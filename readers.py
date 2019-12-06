@@ -20,5 +20,5 @@ class PAFReader():
                 self.overlaps.append(Overlap(args))
 
 if __name__=='__main__':
-    overlaps=PAFReader('overlaps_mjau.paf')
-    print(overlaps.overlaps[0].args)
+    overlaps=PAFReader('overlaps.paf')
+    print(overlaps.overlaps[69].args)
