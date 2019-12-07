@@ -1,33 +1,23 @@
 from readers import PAFReader
-from alignment import Overlap
-
+from alignment import Utils
 
 class Edge():
-    def __init__(self,node_from,node_to,type,strand,overlap_score,extension_score):
+    def __init__(self,node_from,node_to,strand,overlap_score,extension_score):
         self.node_from=node_from
         self.node_to=node_to
-        self.type=type
         self.strand=strand
         self.overlap_score=overlap_score
         self.extension_score=extension_score
 
-    def construct_edge(overlap,type):
-        overlap_score=Overlap.get_overlap_score(overlap)
+    def construct_edges(overlap):
+        #TODO: STO S TYPEOM? I REALTIVE STRANDOM?
+        overlap_score=Utils.get_overlap_score(overlap)
+        extension_score_left_to_right,extension_score_right_to_left=Utils.get_extension_scores(overlap,overlap_score)
 
-        if overlap.target_start==0:
-            start_node=Node(overlap.query_name)
-            end_node=Node(overlap.target_name)
-
-            #TODO: ZASTO JE UOPCE RAZLIKA IZMEDU EXTENSION SCOREOVA?
-            extension_score=Overlap.get_extension_score(overlap,overlap_score)
-        else:
-            start_node=Node(overlap.target_name)
-            end_node=Node(overlap.query_name)
-
-            extension_score=Overlap.get_extension_score(overlap,overlap_score)
-
-        return Edge(start_node,end_node,type,overlap.relative_strand,overlap_score,extension_score)
-
+        return [
+                Edge(Node(overlap.query_name),Node(overlap.target_name),overlap.relative_strand,overlap_score,extension_score_left_to_right),
+                Edge(Node(overlap.target_name),Node(overlap.query_name),overlap.relative_strand,overlap_score,extension_score_right_to_left)
+                ]
 
 class Node():
     def __init__(self,name):
@@ -43,31 +33,22 @@ class Graph():
         self.edges={}
 
         cr_paf=PAFReader(contig_read_overlap_path)
-        cr_cleaned_overlaps=Overlap.get_extension_overlaps(cr_paf.overlaps)
+        cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
 
         rr_paf=PAFReader(read_read_overlap_path)
-        rr_cleaned_overlaps=Overlap.get_extension_overlaps(rr_paf.overlaps)
+        rr_cleaned_overlaps=Utils.get_extension_overlaps(rr_paf.overlaps)
 
+        edges=[]
+        all_overlaps=cr_cleaned_overlaps+rr_cleaned_overlaps
+        for overlap in all_overlaps:
+            edges+=Edge.construct_edges(overlap)
 
         print(rr_cleaned_overlaps[0].target_length,rr_cleaned_overlaps[0].target_start,rr_cleaned_overlaps[0].target_end)
         print(rr_cleaned_overlaps[0].query_length,rr_cleaned_overlaps[0].query_start,rr_cleaned_overlaps[0].query_end)
+
+        print(edges[0].node_from,edges[0].node_to,edges[0].overlap_score,edges[0].extension_score)
+        print(edges[1].node_from,edges[1].node_to,edges[1].overlap_score,edges[1].extension_score)
         exit()
-
-
-
-        '''with open(query_path,'r') as file:
-            contig_lines=file.readlines()
-            contigs={}
-            for i in range(0,len(contig_lines),2):
-                contigs[contig_lines[i][1:].strip()]=contig_lines[i+1]
-
-            for overlap in paf.overlaps:
-                sequence=contigs[overlap.query_name][overlap.query_start:overlap.query_end]
-                node=Node(sequence)
-
-                self.add_node(node)
-
-        print(len(self.nodes))'''
 
     def add_node(self,node):
         self.nodes.append(node)
@@ -78,4 +59,4 @@ class Graph():
 
 
 if __name__=='__main__':
-    overlap_graph=Graph('overlaps.paf','read_overlaps.paf')
+    overlap_graph=Graph('overlaps_mjau.paf','read_overlaps.paf')
