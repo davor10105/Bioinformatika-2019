@@ -37,11 +37,15 @@ class Graph():
         self.extensions={}
         self.edges={'to_right':{},'to_left':{}}
 
+        print('Loading data...')
+
         cr_paf=PAFReader(contig_read_overlap_path)
         cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
 
         rr_paf=PAFReader(read_read_overlap_path)
         rr_cleaned_overlaps=Utils.get_extension_overlaps(rr_paf.overlaps)
+
+        print('Data loaded.')
 
         all_overlaps=cr_cleaned_overlaps+rr_cleaned_overlaps
         for overlap in all_overlaps:
@@ -77,6 +81,15 @@ class Graph():
 
             return to_right_edges+to_left_edges
 
+    def reconstruct_path(self,end_state):
+        path=[]
+        current_state=end_state
+        while current_state.previous_state!=None:
+            path.insert(0,current_state.node)
+            current_state=current_state.previous_state
+        for node in path:
+            print(node)
+
 
 class State():
     def __init__(self,node,previous_state,score,direction):
@@ -87,9 +100,17 @@ class State():
     def __hash__(self):
         return hash((self.node,self.previous_state,self.score,self.direction))
     def __eq__(self,other):
-        if self.node==other.node and self.previous_state.node==other.previous_state.node and self.score==other.score and self.direction==other.direction:
+        if other is None:
+            return False
+        if self.node==other.node and self.get_previous_node()==other.get_previous_node() and self.score==other.score and self.direction==other.direction:
             return True
         return False
+    def __str__(self):
+        return str(self.node)+' '+str(self.get_previous_node())
+    def get_previous_node(self):
+        if self.previous_state is None:
+            return None
+        return self.previous_state.node
 
 
 if __name__=='__main__':

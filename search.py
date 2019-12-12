@@ -11,7 +11,7 @@ class CostSearch():
         open=[start_state]
         current_state=start_state
         while current_state.node!=end_node:
-            print(len(open))
+            #print(len(open))
             if len(open)==0:
                 raise ValueError('No path to end node')
 
@@ -28,6 +28,9 @@ class CostSearch():
         return current_state
 
 if __name__=='__main__':
+    print('Creating the overlap graph...')
     overlap_graph=Graph('overlaps_mjau.paf','read_overlaps.paf')
+    print('Overlap graph done.')
+    print('Starting the search...')
     search=CostSearch(overlap_graph)
-    print(search.search(Node('ctg1'),Node('ctg2')))
+    overlap_graph.reconstruct_path(search.search(Node('ctg1'),Node('ctg2')))
