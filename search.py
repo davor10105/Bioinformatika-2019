@@ -1,16 +1,21 @@
 from graph import *
+from readers import *
 
 class CostSearch():
     def __init__(self,graph):
         self.graph=graph
 
     def search(self,start_node,end_node):
-        start_state=State(start_node,None,0,None)
+        start_state=State(start_node,None,0,None,{start_node},None)
 
         visited=set()
         open=[start_state]
         current_state=start_state
-        while current_state.node!=end_node:
+
+        anchor_names=set(self.graph.anchors.keys())
+        while current_state.node!=end_node and len(anchor_names-set([node.name for node in current_state.used_nodes]))!=0:
+            #print(current_state.node)
+            #print(end_node)
             #print(len(open))
             if len(open)==0:
                 raise ValueError('No path to end node')
@@ -21,7 +26,10 @@ class CostSearch():
             visited.add(current_state)
 
             for edge in self.graph.get_edges(current_state.node,current_state.direction):
-                open.append(State(edge.node_to,current_state,current_state.score+edge.overlap_score,edge.direction))
+                if edge.node_to not in current_state.used_nodes:
+                    new_used_nodes=set(current_state.used_nodes)
+                    new_used_nodes.add(edge.node_to)
+                    open.append(State(edge.node_to,current_state,current_state.score+edge.overlap_score,edge.direction,new_used_nodes,edge))
 
             open=sorted(open,key=lambda state: state.score,reverse=True)
 
@@ -29,8 +37,15 @@ class CostSearch():
 
 if __name__=='__main__':
     print('Creating the overlap graph...')
-    overlap_graph=Graph('overlaps_mjau.paf','read_overlaps.paf')
+    overlap_graph=Graph('./data/ecoli/contigs.fasta','./data/ecoli/reads.fasta','overlaps_mjau.paf','read_overlaps.paf')
     print('Overlap graph done.')
     print('Starting the search...')
     search=CostSearch(overlap_graph)
-    overlap_graph.reconstruct_path(search.search(Node('ctg1'),Node('ctg2')))
+    state=search.search(Node('ctg1'),Node('ctg3'))
+    print('Search done.')
+    print('Reconstructing the genome...')
+    genome=overlap_graph.reconstruct_path(state)
+    print('Reconstruction done.')
+    print('Saving genome...')
+    FASTAReader.save('kita',genome,'kurcina.fasta')
+    print('Save done.')

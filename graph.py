@@ -1,11 +1,11 @@
-from readers import PAFReader
+from readers import *
 from alignment import Utils
 
 class Edge():
-    def __init__(self,node_from,node_to,strand,overlap_score,extension_score,direction):
+    def __init__(self,node_from,node_to,overlap,overlap_score,extension_score,direction):
         self.node_from=node_from
         self.node_to=node_to
-        self.strand=strand
+        self.overlap=overlap
         self.overlap_score=overlap_score
         self.extension_score=extension_score
         self.direction=direction
@@ -16,8 +16,8 @@ class Edge():
         extension_score_left_to_right,extension_score_right_to_left=Utils.get_extension_scores(overlap,overlap_score)
 
         return [
-                Edge(Node(overlap.query_name),Node(overlap.target_name),overlap.relative_strand,overlap_score,extension_score_left_to_right,'to_right'),
-                Edge(Node(overlap.target_name),Node(overlap.query_name),overlap.relative_strand,overlap_score,extension_score_right_to_left,'to_left')
+                Edge(Node(overlap.query_name),Node(overlap.target_name),overlap,overlap_score,extension_score_left_to_right,'to_right'),
+                Edge(Node(overlap.target_name),Node(overlap.query_name),overlap,overlap_score,extension_score_right_to_left,'to_left')
                 ]
 
 class Node():
@@ -32,12 +32,13 @@ class Node():
         return self.name==other.name
 
 class Graph():
-    def __init__(self,contig_read_overlap_path,read_read_overlap_path):
-        self.anchors={}
-        self.extensions={}
+    def __init__(self,contig_path,read_path,contig_read_overlap_path,read_read_overlap_path):
         self.edges={'to_right':{},'to_left':{}}
 
         print('Loading data...')
+
+        self.anchors=FASTAReader(contig_path).reads
+        self.extensions=FASTAReader(read_path).reads
 
         cr_paf=PAFReader(contig_read_overlap_path)
         cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
@@ -57,11 +58,14 @@ class Graph():
                 self.edges['to_left'][new_edges[1].node_from]=[]
             self.edges['to_left'][new_edges[1].node_from].append(new_edges[1])
 
-    def add_node(self,node):
-        self.nodes.append(node)
-
-    def remove_node(self,node):
-        self.nodes.remove(node)
+    def get_genome(self,node):
+        if node.name in self.anchors:
+            return self.anchors[node.name]
+        if node.name in self.extensions:
+            return self.extensions[node.name]
+        print(node_name)
+        print(self.anchors.keys())
+        raise ValueError('Could not find the node name')
 
     def get_edges(self,node,direction):
         if direction is not None:
@@ -82,23 +86,54 @@ class Graph():
             return to_right_edges+to_left_edges
 
     def reconstruct_path(self,end_state):
-        path=[]
+        genome=''
         current_state=end_state
-        while current_state.previous_state!=None:
-            path.insert(0,current_state.node)
+        if current_state.direction=='to_right':
+            node_genome=self.get_genome(current_state.node)
+            genome=node_genome[current_state.edge_from.overlap.target_start:] #last node is from overlap start to the end of its get_genome
             current_state=current_state.previous_state
-        for node in path:
-            print(node)
+            while current_state.previous_state!=None:
+                node_genome=self.get_genome(current_state.node)
+                node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.edge_from.overlap.target_end]
+
+                genome=node_genome+genome
+                if current_state.previous_state.previous_state==None:
+                    node_genome=node_genome[:current_state.edge_from.overlap.query_end] #first node is from its start to overlap end
+                    genome=node_genome+genome
+
+                current_state=current_state.previous_state
+
+        else:
+            node_genome=self.get_genome(current_state.node)
+            genome=node_genome[current_state.edge_from.overlap.query_start:] #last node is from overlap start to the end of its get_genome
+            current_state=current_state.previous_state
+            while current_state.previous_state!=None:
+                node_genome=self.get_genome(current_state.node)
+                node_genome=node_genome[current_state.edge_from.overlap.query_start:current_state.edge_from.overlap.query_end]
+
+                genome=node_genome+genome
+                if current_state.previous_state.previous_state==None:
+                    node_genome=node_genome[:current_state.edge_from.overlap.target_end] #first node is from its start to overlap end
+                    genome=node_genome+genome
+
+                current_state=current_state.previous_state
+
+        return genome
 
 
 class State():
-    def __init__(self,node,previous_state,score,direction):
+    def __init__(self,node,previous_state,score,direction,used_nodes,edge_from):
         self.node=node
         self.previous_state=previous_state
         self.score=score
         self.direction=direction
+        self.used_nodes=used_nodes
+        self.edge_from=edge_from
     def __hash__(self):
-        return hash((self.node,self.previous_state,self.score,self.direction))
+        if self.previous_state==None:
+            return hash((self.node.name,None,self.score,self.direction))
+        else:
+            return hash((self.node.name,self.previous_state.node.name,self.score,self.direction))
     def __eq__(self,other):
         if other is None:
             return False

@@ -19,6 +19,20 @@ class PAFReader():
                 args=[arg.strip() for arg in line.split('\t')]
                 self.overlaps.append(Overlap(args))
 
+class FASTAReader():
+    def __init__(self,filepath):
+        self.reads={}
+        with open(filepath,'r') as file:
+            lines=file.readlines()
+            for i in range(len(lines)//2):
+                read_name=lines[i*2][1:].strip()
+                read=lines[i*2+1].strip()
+                self.reads[read_name]=read
+    def save(node_name,genome,filepath):
+        with open(filepath,'w') as file:
+            file.write('>'+node_name+'\n')
+            file.write(genome)
+
 if __name__=='__main__':
     overlaps=PAFReader('overlaps.paf')
     print(overlaps.overlaps[69].args)
