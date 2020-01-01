@@ -5,7 +5,7 @@ class CostSearch():
     def __init__(self,graph):
         self.graph=graph
 
-    def search(self,start_node,end_node):
+    def search(self,start_node):
         start_state=State(start_node,None,0,None,{start_node},None)
 
         visited=set()
@@ -34,6 +34,7 @@ class CostSearch():
                         open.append(new_state)
 
             open=sorted(open,key=lambda state: state.score,reverse=True)
+            #print(len(open))
 
         #print(current_state.used_nodes)
         return current_state
@@ -45,15 +46,15 @@ if __name__=='__main__':
     print('Starting the search...')
     search=CostSearch(overlap_graph)
 
-    for name in overlap_graph.anchors:
-        try:
-            state=search.search(Node(name),Node('ctg3'))
-            print('Search done.')
-            print('Reconstructing the genome...')
-            genome=overlap_graph.reconstruct_path(state)
-            print('Reconstruction done.')
-            print('Saving genome...')
-            FASTAReader.save('kita',genome,name+'kurcina.fasta')
-            print('Save done.')
-        except:
-            print('Nije %s'%(name))
+    #for name in overlap_graph.anchors:
+    #try:
+    state=search.search(Node('ctg3'))
+    print('Search done.')
+    print('Reconstructing the genome...')
+    genome=overlap_graph.reconstruct_path(state)
+    print('Reconstruction done.')
+    print('Saving genome...')
+    FASTAReader.save('kita',genome,'kita2.fasta')
+    print('Save done.')
+    #except:
+    #    print('Nije %s'%(name))

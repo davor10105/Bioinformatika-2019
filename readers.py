@@ -10,6 +10,9 @@ class Overlap():
         for block,arg in zip(arg_names,args):
             setattr(self,block[0],block[1](arg))
 
+    def __str__(self):
+        return '(%s,%s,%s) (%s,%s,%s)'%(self.query_length,self.query_start,self.query_end,self.target_length,self.target_start,self.target_end)
+
 
 class PAFReader():
     def __init__(self,filepath):

@@ -41,7 +41,9 @@ class Utils():
         return None
 
     def check_confidence(overlap,cutoff=0.97):
-        if (overlap.target_end-overlap.target_start)/overlap.block_length<cutoff:
+        #if overlap.block_length<40000:
+        #   return False
+        if overlap.num_matches/overlap.block_length<cutoff:
             return False
         return True
 

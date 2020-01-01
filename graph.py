@@ -88,36 +88,59 @@ class Graph():
     def reconstruct_path(self,end_state):
         genome=''
         current_state=end_state
+        count=0
+        length=0
+        all_length=0
+        print(current_state.node.name)
+        print(current_state.edge_from.overlap)
         if current_state.direction=='to_right':
+            print('PRAVA STRANA')
             node_genome=self.get_genome(current_state.node)
             genome=node_genome[current_state.edge_from.overlap.target_start:] #last node is from overlap start to the end of its get_genome
-            current_state=current_state.previous_state
-            while current_state.previous_state!=None:
-                node_genome=self.get_genome(current_state.node)
-                node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.edge_from.overlap.target_end]
+            while current_state.previous_state.edge_from!=None:
+                node_genome=self.get_genome(current_state.previous_state.node)
+                all_length+=len(node_genome)
+                node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
 
                 genome=node_genome+genome
-                if current_state.previous_state.previous_state==None:
-                    node_genome=node_genome[:current_state.edge_from.overlap.query_end] #first node is from its start to overlap end
-                    genome=node_genome+genome
 
                 current_state=current_state.previous_state
+                count+=1
+                length+=len(node_genome)
+            node_genome=self.get_genome(current_state.previous_state.node)
+            all_length+=len(node_genome)
+            node_genome=node_genome[:current_state.edge_from.overlap.query_start]
+
+            genome=node_genome+genome
 
         else:
+            print('OBRATNO')
             node_genome=self.get_genome(current_state.node)
-            genome=node_genome[current_state.edge_from.overlap.query_start:] #last node is from overlap start to the end of its get_genome
-            current_state=current_state.previous_state
-            while current_state.previous_state!=None:
-                node_genome=self.get_genome(current_state.node)
-                node_genome=node_genome[current_state.edge_from.overlap.query_start:current_state.edge_from.overlap.query_end]
+            genome=node_genome[:current_state.edge_from.overlap.query_start] #last node is from overlap start to the end of its get_genome
+            while current_state.previous_state.edge_from!=None:
+                node_genome=self.get_genome(current_state.previous_state.node)
+                all_length+=len(node_genome)
+                node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
 
-                genome=node_genome+genome
-                if current_state.previous_state.previous_state==None:
-                    node_genome=node_genome[:current_state.edge_from.overlap.target_end] #first node is from its start to overlap end
-                    genome=node_genome+genome
+                genome+=node_genome
 
                 current_state=current_state.previous_state
+                count+=1
+                length+=len(node_genome)
+            node_genome=self.get_genome(current_state.previous_state.node)
+            all_length+=len(node_genome)
+            node_genome=node_genome[current_state.edge_from.overlap.target_start:]
 
+            genome=node_genome+genome
+
+        print("broj nodeova")
+        print(count)
+        print('avg genome length')
+        print(length/count)
+        print('avg all length')
+        print(all_length/count)
+        print('genome length')
+        print(len(genome))
         return genome
 
 
