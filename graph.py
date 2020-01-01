@@ -130,6 +130,9 @@ class State():
         self.used_nodes=used_nodes
         self.edge_from=edge_from
     def __hash__(self):
+        #TODO: OVO JE DODANO
+        return hash(self.node.name)
+
         if self.previous_state==None:
             return hash((self.node.name,None,self.score,self.direction))
         else:

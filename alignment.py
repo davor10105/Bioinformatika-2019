@@ -3,10 +3,19 @@ from readers import Overlap
 class Utils():
     def get_extension_overlaps(overlaps):
         extension_overlaps=[]
+        unconfident=0
         for overlap in overlaps:
             left_right_overlap=Utils.check_if_contained(overlap)
             if left_right_overlap is not None:
-                extension_overlaps.append(left_right_overlap)
+                if Utils.check_confidence(overlap):
+                    extension_overlaps.append(left_right_overlap)
+                else:
+                    unconfident+=1
+
+        print("Unconfident")
+        print(unconfident)
+        print("Confident")
+        print(len(overlaps)-unconfident)
 
         return extension_overlaps
 
@@ -30,6 +39,11 @@ class Utils():
             overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
             return overlap
         return None
+
+    def check_confidence(overlap,cutoff=0.97):
+        if (overlap.target_end-overlap.target_start)/overlap.block_length<cutoff:
+            return False
+        return True
 
     def get_overlap_score(overlap):
         OL1=overlap.query_end-overlap.query_start
