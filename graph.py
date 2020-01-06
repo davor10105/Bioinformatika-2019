@@ -2,6 +2,12 @@ from readers import *
 from alignment import Utils
 
 class Edge():
+    '''
+    Defines an edge in an overlap graph, contains two Node objects, node_from,
+    node_to, Overlap object, both scores (int) and a direction (str), which can be
+    'to_right' or 'to_left'. The direction is considered during the path construction
+    because only one type of direction can be used in a single path.
+    '''
     def __init__(self,node_from,node_to,overlap,overlap_score,extension_score,direction):
         self.node_from=node_from
         self.node_to=node_to
@@ -11,6 +17,12 @@ class Edge():
         self.direction=direction
 
     def construct_edges(overlap):
+        '''
+        From a given overlap, calculates both scores and constructs two edges
+        for an overlap graph. For example, if the overlap is between nodes A - B,
+        one contructed edge will be Edge(A,B,...,'to_right') and the other
+        Edge(B,A,...,'to_left').
+        '''
         #TODO: STO S TYPEOM? I REALTIVE STRANDOM?
         overlap_score=Utils.get_overlap_score(overlap)
         extension_score_left_to_right,extension_score_right_to_left=Utils.get_extension_scores(overlap,overlap_score)
@@ -21,6 +33,9 @@ class Edge():
                 ]
 
 class Node():
+    '''
+    Defines a single node in an overlap graph.
+    '''
     def __init__(self,name):
         self.name=name
 
@@ -32,11 +47,19 @@ class Node():
         return self.name==other.name
 
 class Graph():
+    '''
+    Defines an overlap graph. Contains edges in a dictionary self.edges that looks
+    like {'to_right': {node1: [LIST_OF_THIS_NODE'S_TORIGHT_EDGES],node2: [LIST_OF_THIS_NODE'S_TORIGHT_EDGES]}...,
+        'to_left': {node1: [LIST_OF_THIS_NODE'S_TOLEFT_EDGES],node2: [LIST_OF_THIS_NODE'S_TOLEFT_EDGES]}}.
+
+    Contains the full str partial genomes of contigs in self.anchors and reads in self.extensions.
+    '''
     def __init__(self,contig_path,read_path,contig_read_overlap_path,read_read_overlap_path):
         self.edges={'to_right':{},'to_left':{}}
 
         print('Loading data...')
 
+        #TODO: TREBA PROVJERITI TREBA LI FASTA ILI FASTAQ
         self.anchors=FASTAReader(contig_path).reads
         self.extensions=FASTAReader(read_path).reads
 
@@ -59,6 +82,9 @@ class Graph():
             self.edges['to_left'][new_edges[1].node_from].append(new_edges[1])
 
     def get_genome(self,node):
+        '''
+        Returns the string genome of a given node.
+        '''
         if node.name in self.anchors:
             return self.anchors[node.name]
         if node.name in self.extensions:
@@ -68,6 +94,11 @@ class Graph():
         raise ValueError('Could not find the node name')
 
     def get_edges(self,node,direction):
+        '''
+        Returns the available edges from the given node in a given direction.
+        If direction is None, returns edges from both directions (useful for the first
+        node in a search when the direction is not yet decided).
+        '''
         if direction is not None:
             try:
                 return self.edges[direction][node]
@@ -86,6 +117,9 @@ class Graph():
             return to_right_edges+to_left_edges
 
     def reconstruct_path(self,end_state):
+        '''
+        From a given search State, returns the full reconstructed genome using backtracking.
+        '''
         genome=''
         current_state=end_state
         count=0
@@ -145,6 +179,13 @@ class Graph():
 
 
 class State():
+    '''
+    Defines a search State. Contains a node, state from which this state was
+    found in self.previous_state, current path's score in self.score, direction of
+    the edges, used_nodes in the search path (used to quickly check if all contigs
+    were visited in this path) and edge_from, which is the edge that leads from
+    previous_state to this state.
+    '''
     def __init__(self,node,previous_state,score,direction,used_nodes,edge_from):
         self.node=node
         self.previous_state=previous_state
@@ -153,13 +194,17 @@ class State():
         self.used_nodes=used_nodes
         self.edge_from=edge_from
     def __hash__(self):
+        '''
+        Nisam siguran treba li ovdje samo hash node.name-a za pamćenje visited stanja
+        ili jos nesto, zasad ovak radi.
+        '''
         #TODO: OVO JE DODANO
         return hash(self.node.name)
 
-        if self.previous_state==None:
-            return hash((self.node.name,None,self.score,self.direction))
-        else:
-            return hash((self.node.name,self.previous_state.node.name,self.score,self.direction))
+        #if self.previous_state==None:
+        #    return hash((self.node.name,None,self.score,self.direction))
+        #else:
+        #    return hash((self.node.name,self.previous_state.node.name,self.score,self.direction))
     def __eq__(self,other):
         if other is None:
             return False
@@ -169,6 +214,9 @@ class State():
     def __str__(self):
         return str(self.node)+' '+str(self.get_previous_node())
     def get_previous_node(self):
+        '''
+        Returns the previous state.
+        '''
         if self.previous_state is None:
             return None
         return self.previous_state.node

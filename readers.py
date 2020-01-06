@@ -1,5 +1,8 @@
 
 class Overlap():
+    '''
+    Defines an overlap, basically PAF format overlap in a class.
+    '''
     def __init__(self,args):
         self.args=args[:12]
         arg_names=[('query_name',str),('query_length',int),('query_start',int),('query_end',int),
@@ -15,6 +18,9 @@ class Overlap():
 
 
 class PAFReader():
+    '''
+    Reads PAF formatted file.
+    '''
     def __init__(self,filepath):
         self.overlaps=[]
         with open(filepath,'r') as file:
@@ -22,7 +28,12 @@ class PAFReader():
                 args=[arg.strip() for arg in line.split('\t')]
                 self.overlaps.append(Overlap(args))
 
+#TODO: TREBA I FASTAQ READER
 class FASTAReader():
+    '''
+    Reads a FASTA file and constructs a dictionary:
+    {'node_name': NODE_GENOME (string)}
+    '''
     def __init__(self,filepath):
         self.reads={}
         with open(filepath,'r') as file:
