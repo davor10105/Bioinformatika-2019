@@ -59,9 +59,14 @@ class Graph():
 
         print('Loading data...')
 
-        #TODO: TREBA PROVJERITI TREBA LI FASTA ILI FASTAQ
-        self.anchors=FASTAReader(contig_path).reads
-        self.extensions=FASTAReader(read_path).reads
+        if contig_path.endswith('fasta'):
+            self.anchors=FASTAReader(contig_path).reads
+        else:
+            self.anchors=FASTQReader(contig_path).reads
+        if read_path.endswith('fasta'):
+            self.extensions=FASTAReader(read_path).reads
+        else:
+            self.extensions=FASTQReader(read_path).reads
 
         cr_paf=PAFReader(contig_read_overlap_path)
         cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)

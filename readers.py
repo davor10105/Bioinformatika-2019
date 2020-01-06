@@ -47,6 +47,20 @@ class FASTAReader():
             file.write('>'+node_name+'\n')
             file.write(genome)
 
+class FASTQReader():
+    '''
+    Reads a FASTAQ file and constructs a dictionary:
+    {'node_name': NODE_GENOME (string)}
+    '''
+    def __init__(self,filepath):
+        self.reads={}
+        with open(filepath,'r') as file:
+            lines=file.readlines()
+            for i in range(len(lines)//4):
+                read_name=lines[i*4][1:].strip()
+                read=lines[i*4+1].strip()
+                self.reads[read_name]=read
+
 if __name__=='__main__':
     overlaps=PAFReader('overlaps.paf')
     print(overlaps.overlaps[69].args)
