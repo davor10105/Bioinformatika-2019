@@ -52,6 +52,10 @@ class CostSearch():
                     while current_state.previous_state.node.name not in anchor_names:
                         current_state=current_state.previous_state
 
+                    open=sorted(open,key=lambda state:len(anchor_names.intersection(set([node.name for node in state.used_nodes]))),reverse=True)
+                    print('Node s najvecim brojem contiga:')
+                    print(len(anchor_names.intersection(set([node.name for node in open[0].used_nodes]))))
+
                     temp_state=current_state
                     while temp_state.previous_state!=None:
                         if temp_state.node.name in anchor_names:
@@ -77,7 +81,7 @@ class CostSearch():
                     '''
                     new_used_nodes=set(current_state.used_nodes)
                     new_used_nodes.add(edge.node_to)
-                    new_state=State(edge.node_to,current_state,current_state.score+edge.overlap_score,edge.direction,new_used_nodes,edge)
+                    new_state=State(edge.node_to,current_state,current_state.score+edge.extension_score,edge.direction,new_used_nodes,edge)
                     '''
                     Ovdje se moze mijenjati iz +edge.overlap_score u +edge.extension score
                     kako bi se koristio jedan ili drugi scoring, ali mislim da je skoro

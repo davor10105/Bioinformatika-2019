@@ -69,10 +69,12 @@ class Graph():
             self.extensions=FASTQReader(read_path).reads
 
         cr_paf=PAFReader(contig_read_overlap_path)
-        cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
+        #cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
+        cr_cleaned_overlaps=cr_paf.overlaps
 
         rr_paf=PAFReader(read_read_overlap_path)
-        rr_cleaned_overlaps=Utils.get_extension_overlaps(rr_paf.overlaps)
+        #rr_cleaned_overlaps=Utils.get_extension_overlaps(rr_paf.overlaps)
+        rr_cleaned_overlaps=rr_paf.overlaps
 
         print('Data loaded.')
 

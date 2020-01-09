@@ -1,5 +1,3 @@
-from readers import Overlap
-
 class Utils():
     def get_extension_overlaps(overlaps):
         '''
@@ -71,7 +69,7 @@ class Utils():
             return overlap
         return None
 
-    def check_confidence(overlap,cutoff=0.):
+    def check_confidence(overlap,cutoff=0.25):
         '''
         Checks if the overlap is within a certain threshold.
         '''

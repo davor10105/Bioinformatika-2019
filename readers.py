@@ -1,4 +1,6 @@
 
+from alignment import Utils
+
 class Overlap():
     '''
     Defines an overlap, basically PAF format overlap in a class.
@@ -28,7 +30,10 @@ class PAFReader():
             for line in file.readlines():
                 count+=1
                 args=[arg.strip() for arg in line.split('\t')]
-                self.overlaps.append(Overlap(args))
+                new_overlap=Utils.check_if_contained(Overlap(args))
+                if new_overlap!=None:
+                    if Utils.check_confidence(new_overlap):
+                        self.overlaps.append(new_overlap)
 
                 if count%10000==0:
                     print("Broj obradenih overlapa:")
