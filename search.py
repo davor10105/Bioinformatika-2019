@@ -25,6 +25,8 @@ class CostSearch():
         open=[start_state]
         current_state=start_state
 
+        upper_length_threshold=0.15*sum([len(self.graph.anchors[anchor]) for anchor in self.graph.anchors])
+
         anchor_names=set(self.graph.anchors.keys())
         while len(anchor_names-set([node.name for node in current_state.used_nodes]))!=0:
             '''
@@ -40,6 +42,26 @@ class CostSearch():
                 raise ValueError('No path to end node')
 
             current_state=open.pop(0)
+            if current_state.direction!=None:
+                path_length=len(self.graph.reconstruct_path(current_state))
+                intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
+                anchor_length=sum([len(self.graph.anchors[anchor]) for anchor in intersecting_anchors])
+                if path_length-anchor_length>upper_length_threshold:
+                    print('Number of found contigs:')
+                    print(len(intersecting_anchors))
+                    while current_state.previous_state.node.name not in anchor_names:
+                        current_state=current_state.previous_state
+
+                    temp_state=current_state
+                    while temp_state.previous_state!=None:
+                        if temp_state.node.name in anchor_names:
+                            print(temp_state.node.name,end=' ')
+                        temp_state=temp_state.previous_state
+                    print(temp_state.node.name,end=' ')
+                    print()
+
+                    return current_state
+                    raise ValueError('Path is too long')
             if current_state in visited:
                 continue
             visited.add(current_state)
@@ -80,7 +102,7 @@ if __name__=='__main__':
     needs contig.fasta reads.fasta overlaps_contig_reads and overlaps_reads_reads files
     to construct the overlap graph
     '''
-    overlap_graph=Graph('./data/ecoli/contigs.fasta','./data/ecoli/reads.fasta','overlaps_mjau.paf','read_overlaps.paf')
+    overlap_graph=Graph('./data/cjejuni/contigs.fasta','./data/cjejuni/reads.fastq','./data/cjejuni/contig_read.paf','./data/cjejuni/read_read.paf')
     print('Overlap graph done.')
     print('Starting the search...')
     search=CostSearch(overlap_graph)
@@ -90,19 +112,22 @@ if __name__=='__main__':
     je kako se to radi iterativno za svaki contig, onda samo umjesto 'ctg3' stavite
     name kako bi se krenulo od tog Nodea.
     '''
-    #for name in overlap_graph.anchors:
-    #try:
-    state=search.search(Node('ctg3'))
+    current_best_state=None
+    for name in overlap_graph.anchors:
+        try:
+            state=search.search(Node(name))
+            current_best_state=state.compare(current_best_state)
+        except:
+            print('Nije %s'%(name))
+
     print('Search done.')
     print('Reconstructing the genome...')
-    genome=overlap_graph.reconstruct_path(state)
+    genome=overlap_graph.reconstruct_path(current_best_state)
     print('Reconstruction done.')
     print('Saving genome...')
 
     '''
     saves the found genome in file kita2.fasta and names the genome 'kita'
     '''
-    FASTAReader.save('kita',genome,'kita2.fasta')
+    FASTAReader.save('kita',genome,'cjejuni.fasta')
     print('Save done.')
-    #except:
-    #    print('Nije %s'%(name))

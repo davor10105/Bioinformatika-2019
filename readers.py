@@ -24,11 +24,16 @@ class PAFReader():
     def __init__(self,filepath):
         self.overlaps=[]
         with open(filepath,'r') as file:
+            count=0
             for line in file.readlines():
+                count+=1
                 args=[arg.strip() for arg in line.split('\t')]
                 self.overlaps.append(Overlap(args))
 
-#TODO: TREBA I FASTAQ READER
+                if count%10000==0:
+                    print("Broj obradenih overlapa:")
+                    print(count)
+
 class FASTAReader():
     '''
     Reads a FASTA file and constructs a dictionary:
@@ -39,7 +44,7 @@ class FASTAReader():
         with open(filepath,'r') as file:
             lines=file.readlines()
             for i in range(len(lines)//2):
-                read_name=lines[i*2][1:].strip()
+                read_name=lines[i*2][1:].split()[0].strip()
                 read=lines[i*2+1].strip()
                 self.reads[read_name]=read
     def save(node_name,genome,filepath):

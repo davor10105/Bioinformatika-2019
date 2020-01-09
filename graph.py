@@ -130,10 +130,10 @@ class Graph():
         count=0
         length=0
         all_length=0
-        print(current_state.node.name)
-        print(current_state.edge_from.overlap)
+        #print(current_state.node.name)
+        #print(current_state.edge_from.overlap)
         if current_state.direction=='to_right':
-            print('PRAVA STRANA')
+            #print('PRAVA STRANA')
             node_genome=self.get_genome(current_state.node)
             genome=node_genome[current_state.edge_from.overlap.target_start:] #last node is from overlap start to the end of its get_genome
             while current_state.previous_state.edge_from!=None:
@@ -153,7 +153,7 @@ class Graph():
             genome=node_genome+genome
 
         else:
-            print('OBRATNO')
+            #print('OBRATNO')
             node_genome=self.get_genome(current_state.node)
             genome=node_genome[:current_state.edge_from.overlap.query_start] #last node is from overlap start to the end of its get_genome
             while current_state.previous_state.edge_from!=None:
@@ -171,7 +171,7 @@ class Graph():
             node_genome=node_genome[current_state.edge_from.overlap.target_start:]
 
             genome=node_genome+genome
-
+        '''
         print("broj nodeova")
         print(count)
         print('avg genome length')
@@ -180,6 +180,7 @@ class Graph():
         print(all_length/count)
         print('genome length')
         print(len(genome))
+        '''
         return genome
 
 
@@ -225,6 +226,17 @@ class State():
         if self.previous_state is None:
             return None
         return self.previous_state.node
+
+    def compare(self,other):
+        '''
+        compares this State with another and returns the better state
+        '''
+        if not isinstance(other,State):
+            return self
+
+        if self.score>other.score:
+            return self
+        return other
 
 
 if __name__=='__main__':
