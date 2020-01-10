@@ -144,7 +144,7 @@ class Graph():
                 node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
 
                 if current_state.previous_state.edge_from.overlap.relative_strand=='-':
-                    genome=Utils.complement(node_genome)+genome
+                    genome=Utils.reverse_complement(node_genome)+genome
                 else:
                     genome=node_genome+genome
 
@@ -156,7 +156,7 @@ class Graph():
             node_genome=node_genome[:current_state.edge_from.overlap.query_start]
 
             if current_state.edge_from.overlap.relative_strand=='-':
-                genome=Utils.complement(node_genome)+genome
+                genome=Utils.reverse_complement(node_genome)+genome
             else:
                 genome=node_genome+genome
 
@@ -170,7 +170,7 @@ class Graph():
                 node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
 
                 if current_state.previous_state.edge_from.overlap.relative_strand=='-':
-                    genome+=Utils.complement(node_genome)
+                    genome+=Utils.reverse_complement(node_genome)
                 else:
                     genome+=node_genome
 
@@ -182,7 +182,7 @@ class Graph():
             node_genome=node_genome[current_state.edge_from.overlap.target_start:]
 
             if current_state.edge_from.overlap.relative_strand=='-':
-                genome+=Utils.complement(node_genome)
+                genome+=Utils.reverse_complement(node_genome)
             else:
                 genome+=node_genome
         '''
