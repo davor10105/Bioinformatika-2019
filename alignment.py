@@ -103,7 +103,7 @@ class Utils():
         ES2=overlap_score+EL2/2-(OH1+OH2)/2
 
         return ES2,ES1
-    
+
     def reverse_complement(sequence):
         '''
         Returns a reverse complement sequence

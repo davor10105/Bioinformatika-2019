@@ -143,7 +143,10 @@ class Graph():
                 all_length+=len(node_genome)
                 node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
 
-                genome=node_genome+genome
+                if current_state.previous_state.edge_from.overlap.relative_strand=='-':
+                    genome=Utils.complement(node_genome)+genome
+                else:
+                    genome=node_genome+genome
 
                 current_state=current_state.previous_state
                 count+=1
@@ -152,7 +155,10 @@ class Graph():
             all_length+=len(node_genome)
             node_genome=node_genome[:current_state.edge_from.overlap.query_start]
 
-            genome=node_genome+genome
+            if current_state.edge_from.overlap.relative_strand=='-':
+                genome=Utils.complement(node_genome)+genome
+            else:
+                genome=node_genome+genome
 
         else:
             #print('OBRATNO')
@@ -163,7 +169,10 @@ class Graph():
                 all_length+=len(node_genome)
                 node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
 
-                genome+=node_genome
+                if current_state.previous_state.edge_from.overlap.relative_strand=='-':
+                    genome+=Utils.complement(node_genome)
+                else:
+                    genome+=node_genome
 
                 current_state=current_state.previous_state
                 count+=1
@@ -172,7 +181,10 @@ class Graph():
             all_length+=len(node_genome)
             node_genome=node_genome[current_state.edge_from.overlap.target_start:]
 
-            genome=node_genome+genome
+            if current_state.edge_from.overlap.relative_strand=='-':
+                genome+=Utils.complement(node_genome)
+            else:
+                genome+=node_genome
         '''
         print("broj nodeova")
         print(count)
@@ -194,13 +206,14 @@ class State():
     were visited in this path) and edge_from, which is the edge that leads from
     previous_state to this state.
     '''
-    def __init__(self,node,previous_state,score,direction,used_nodes,edge_from):
+    def __init__(self,node,previous_state,score,direction,used_nodes,edge_from,anchors_found):
         self.node=node
         self.previous_state=previous_state
         self.score=score
         self.direction=direction
         self.used_nodes=used_nodes
         self.edge_from=edge_from
+        self.anchors_found=anchors_found
     def __hash__(self):
         '''
         Nisam siguran treba li ovdje samo hash node.name-a za pamćenje visited stanja
@@ -235,7 +248,8 @@ class State():
         '''
         if not isinstance(other,State):
             return self
-
+        if self.anchors_found>other.anchors_found:
+            return self
         if self.score>other.score:
             return self
         return other

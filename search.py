@@ -15,7 +15,7 @@ class CostSearch():
         (we are trying to maximize the score) until we reach the State that visited
         all contigs (anchor nodes)
         '''
-        start_state=State(start_node,None,0,None,{start_node},None)
+        start_state=State(start_node,None,0,None,{start_node},None,1)
         '''
         start_state is (starting_node, previous state and edge are None, starting score is 0
         and direction is None so that the path can go either way in the beginning).
@@ -28,7 +28,8 @@ class CostSearch():
         upper_length_threshold=0.15*sum([len(self.graph.anchors[anchor]) for anchor in self.graph.anchors])
 
         anchor_names=set(self.graph.anchors.keys())
-        while len(anchor_names-set([node.name for node in current_state.used_nodes]))!=0:
+        #while len(anchor_names-set([node.name for node in current_state.used_nodes]))!=0:
+        while len(anchor_names)-current_state.anchors_found!=0:
             '''
             Check if current state visited all contigs
             '''
@@ -42,6 +43,13 @@ class CostSearch():
                 raise ValueError('No path to end node')
 
             current_state=open.pop(0)
+
+            #intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
+            print('Number of found contigs:')
+            #print(len(intersecting_anchors))
+            print(current_state.anchors_found)
+
+
             if current_state.direction!=None:
                 path_length=len(self.graph.reconstruct_path(current_state))
                 intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
@@ -65,10 +73,12 @@ class CostSearch():
                     print()
 
                     return current_state
-                    raise ValueError('Path is too long')
-            if current_state in visited:
-                continue
-            visited.add(current_state)
+                    #raise ValueError('Path is too long')
+
+
+            #if current_state in visited:
+            #    continue
+            #visited.add(current_state)
 
             for edge in self.graph.get_edges(current_state.node,current_state.direction):
                 '''
@@ -81,24 +91,30 @@ class CostSearch():
                     '''
                     new_used_nodes=set(current_state.used_nodes)
                     new_used_nodes.add(edge.node_to)
-                    new_state=State(edge.node_to,current_state,current_state.score+edge.extension_score,edge.direction,new_used_nodes,edge)
+                    new_anchor_num=current_state.anchors_found
+                    if edge.node_to.name in anchor_names:
+                        new_anchor_num+=1
+                    new_state=State(edge.node_to,current_state,current_state.score+edge.extension_score,edge.direction,new_used_nodes,edge,new_anchor_num)
                     '''
                     Ovdje se moze mijenjati iz +edge.overlap_score u +edge.extension score
                     kako bi se koristio jedan ili drugi scoring, ali mislim da je skoro
                     pa svejedno, za ecoli se dobije isto.
                     '''
-                    if new_state not in visited:
-                        open.append(new_state)
+                    #if new_state not in visited:
+                    open.append(new_state)
 
             '''
             Mislim da bi se ovdje nekako moglo registrirati da se put ne moze naci
             prije nego se memorija popuni (jer open lista ima ogroman broj stateova).
             '''
-            open=sorted(open,key=lambda state: state.score,reverse=True)
+            open=sorted(open,key=state_key,reverse=True)
             #print(len(open))
 
         #print(current_state.used_nodes)
         return current_state
+
+def state_key(state):
+    return state.anchors_found,state.score
 
 if __name__=='__main__':
     print('Creating the overlap graph...')
