@@ -108,7 +108,7 @@ class Utils():
         '''
         Returns a reverse complement sequence
         '''
-        sequence = complement(sequence)
+        sequence = Utils.complement(sequence)
         return sequence[::-1]
 
     def complement(sequence):
