@@ -138,13 +138,17 @@ class Graph():
             #print('PRAVA STRANA')
             node_genome=self.get_genome(current_state.node)
             genome=node_genome[current_state.edge_from.overlap.target_start:] #last node is from overlap start to the end of its get_genome
+            switch_strand=False
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
                 all_length+=len(node_genome)
                 node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
 
-                if current_state.previous_state.edge_from.overlap.relative_strand=='-':
+                if current_state.edge_from.overlap.relative_strand=='-':
+                    switch_strand=not switch_strand
+                if switch_strand:
                     genome=Utils.reverse_complement(node_genome)+genome
+                    #genome=node_genome+genome
                 else:
                     genome=node_genome+genome
 
@@ -156,7 +160,10 @@ class Graph():
             node_genome=node_genome[:current_state.edge_from.overlap.query_start]
 
             if current_state.edge_from.overlap.relative_strand=='-':
+                switch_strand=not switch_strand
+            if switch_strand:
                 genome=Utils.reverse_complement(node_genome)+genome
+                #genome=node_genome+genome
             else:
                 genome=node_genome+genome
 
@@ -164,13 +171,17 @@ class Graph():
             #print('OBRATNO')
             node_genome=self.get_genome(current_state.node)
             genome=node_genome[:current_state.edge_from.overlap.query_start] #last node is from overlap start to the end of its get_genome
+            switch_strand=False
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
                 all_length+=len(node_genome)
                 node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
 
-                if current_state.previous_state.edge_from.overlap.relative_strand=='-':
+                if current_state.edge_from.overlap.relative_strand=='-':
+                    switch_strand=not switch_strand
+                if switch_strand:
                     genome+=Utils.reverse_complement(node_genome)
+                    #genome+=node_genome
                 else:
                     genome+=node_genome
 
@@ -182,7 +193,10 @@ class Graph():
             node_genome=node_genome[current_state.edge_from.overlap.target_start:]
 
             if current_state.edge_from.overlap.relative_strand=='-':
+                switch_strand=not switch_strand
+            if switch_strand:
                 genome+=Utils.reverse_complement(node_genome)
+                #genome+=node_genome
             else:
                 genome+=node_genome
         '''
@@ -195,6 +209,40 @@ class Graph():
         print('genome length')
         print(len(genome))
         '''
+        return genome
+
+    def get_extension_genome(self,end_state):
+        '''
+        From a given search State, returns the full reconstructed genome using backtracking.
+        '''
+        genome=''
+        current_state=end_state
+        if current_state.node.name in self.anchors:
+            return genome
+
+        #print(current_state.node.name)
+        #print(current_state.edge_from.overlap)
+        if current_state.direction=='to_right':
+            #print('PRAVA STRANA')
+            node_genome=self.get_genome(current_state.node)
+            genome=node_genome[current_state.edge_from.overlap.target_start:]
+            while current_state.previous_state.node.name not in self.anchors:
+                node_genome=self.get_genome(current_state.previous_state.node)
+                node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
+                genome=node_genome+genome
+
+                current_state=current_state.previous_state
+
+        else:
+            #print('OBRATNO')
+            node_genome=self.get_genome(current_state.node)
+            genome=node_genome[:current_state.edge_from.overlap.query_start]
+            while current_state.previous_state.node.name not in self.anchors:
+                node_genome=self.get_genome(current_state.previous_state.node)
+                node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
+                genome+=node_genome
+
+                current_state=current_state.previous_state
         return genome
 
 

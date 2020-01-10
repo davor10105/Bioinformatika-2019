@@ -69,7 +69,7 @@ class Utils():
             return overlap
         return None
 
-    def check_confidence(overlap,cutoff=0.25):
+    def check_confidence(overlap,cutoff=0.05):
         '''
         Checks if the overlap is within a certain threshold.
         '''
@@ -121,3 +121,6 @@ class Utils():
         #    bases[i] = complement[bases[i]]
         bases = [complement[base] for base in bases]
         return ''.join(bases)
+
+if __name__=='__main__':
+    print(Utils.reverse_complement('AATTTGGCCCTT'))

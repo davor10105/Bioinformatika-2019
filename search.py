@@ -25,7 +25,7 @@ class CostSearch():
         open=[start_state]
         current_state=start_state
 
-        upper_length_threshold=0.15*sum([len(self.graph.anchors[anchor]) for anchor in self.graph.anchors])
+        upper_length_threshold=0.75*sum([len(self.graph.anchors[anchor]) for anchor in self.graph.anchors])/len(self.graph.anchors)
 
         anchor_names=set(self.graph.anchors.keys())
         #while len(anchor_names-set([node.name for node in current_state.used_nodes]))!=0:
@@ -45,20 +45,20 @@ class CostSearch():
             current_state=open.pop(0)
 
             #intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
-            print('Number of found contigs:')
+            #print('Number of found contigs:')
             #print(len(intersecting_anchors))
-            print(current_state.anchors_found)
+            #print(current_state.anchors_found)
 
 
             if current_state.direction!=None:
                 path_length=len(self.graph.reconstruct_path(current_state))
                 intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
                 anchor_length=sum([len(self.graph.anchors[anchor]) for anchor in intersecting_anchors])
-                if path_length-anchor_length>upper_length_threshold:
+                if len(self.graph.get_extension_genome(current_state))>upper_length_threshold:
                     print('Number of found contigs:')
                     print(len(intersecting_anchors))
-                    while current_state.previous_state.node.name not in anchor_names:
-                        current_state=current_state.previous_state
+                    #while current_state.previous_state.node.name not in anchor_names:
+                    #    current_state=current_state.previous_state
 
                     open=sorted(open,key=lambda state:len(anchor_names.intersection(set([node.name for node in state.used_nodes]))),reverse=True)
                     print('Node s najvecim brojem contiga:')
@@ -94,7 +94,7 @@ class CostSearch():
                     new_anchor_num=current_state.anchors_found
                     if edge.node_to.name in anchor_names:
                         new_anchor_num+=1
-                    new_state=State(edge.node_to,current_state,current_state.score+edge.extension_score,edge.direction,new_used_nodes,edge,new_anchor_num)
+                    new_state=State(edge.node_to,current_state,current_state.score+edge.overlap_score,edge.direction,new_used_nodes,edge,new_anchor_num)
                     '''
                     Ovdje se moze mijenjati iz +edge.overlap_score u +edge.extension score
                     kako bi se koristio jedan ili drugi scoring, ali mislim da je skoro
@@ -114,7 +114,9 @@ class CostSearch():
         return current_state
 
 def state_key(state):
-    return state.anchors_found,state.score
+    return state.score,state.anchors_found
+    #return state.anchors_found,state.score
+    return state.score
 
 if __name__=='__main__':
     print('Creating the overlap graph...')
@@ -122,7 +124,7 @@ if __name__=='__main__':
     needs contig.fasta reads.fasta overlaps_contig_reads and overlaps_reads_reads files
     to construct the overlap graph
     '''
-    overlap_graph=Graph('./data/cjejuni/contigs.fasta','./data/cjejuni/reads.fastq','./data/cjejuni/contig_read.paf','./data/cjejuni/read_read.paf')
+    overlap_graph=Graph('./data/ecoli/contigs.fasta','./data/ecoli/reads.fasta','./data/ecoli/contig_read.paf','./data/ecoli/read_read.paf')
     print('Overlap graph done.')
     print('Starting the search...')
     search=CostSearch(overlap_graph)
@@ -134,11 +136,11 @@ if __name__=='__main__':
     '''
     current_best_state=None
     for name in overlap_graph.anchors:
-        try:
-            state=search.search(Node(name))
-            current_best_state=state.compare(current_best_state)
-        except:
-            print('Nije %s'%(name))
+        #try:
+        state=search.search(Node(name))
+        current_best_state=state.compare(current_best_state)
+        #except:
+        #    print('Nije %s'%(name))
 
     print('Search done.')
     print('Reconstructing the genome...')
@@ -149,5 +151,5 @@ if __name__=='__main__':
     '''
     saves the found genome in file kita2.fasta and names the genome 'kita'
     '''
-    FASTAReader.save('kita',genome,'cjejuni.fasta')
+    FASTAReader.save('kita',genome,'ecoli.fasta')
     print('Save done.')
