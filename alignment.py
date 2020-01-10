@@ -103,3 +103,21 @@ class Utils():
         ES2=overlap_score+EL2/2-(OH1+OH2)/2
 
         return ES2,ES1
+    
+    def reverse_complement(sequence):
+        '''
+        Returns a reverse complement sequence
+        '''
+        sequence = complement(sequence)
+        return sequence[::-1]
+
+    def complement(sequence):
+        '''
+        Returns a complement sequence
+        '''
+        complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+        bases = list(sequence)
+        #for i in range(len(bases)):
+        #    bases[i] = complement[bases[i]]
+        bases = [complement[base] for base in bases]
+        return ''.join(bases)
