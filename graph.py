@@ -16,7 +16,7 @@ class Edge():
         self.extension_score=extension_score
         self.direction=direction
 
-    def construct_edges(overlap):
+    def construct_edges(overlap,anchor_names):
         '''
         From a given overlap, calculates both scores and constructs two edges
         for an overlap graph. For example, if the overlap is between nodes A - B,
@@ -26,6 +26,10 @@ class Edge():
         #TODO: STO S TYPEOM? I REALTIVE STRANDOM?
         overlap_score=Utils.get_overlap_score(overlap)
         extension_score_left_to_right,extension_score_right_to_left=Utils.get_extension_scores(overlap,overlap_score)
+        if overlap.query_name in anchor_names or overlap.target_name in anchor_names:
+            overlap_score*=2
+            extension_score_left_to_right*=2
+            extension_score_right_to_left*=2
 
         return [
                 Edge(Node(overlap.query_name),Node(overlap.target_name),overlap,overlap_score,extension_score_left_to_right,'to_right'),
@@ -80,7 +84,7 @@ class Graph():
 
         all_overlaps=cr_cleaned_overlaps+rr_cleaned_overlaps
         for overlap in all_overlaps:
-            new_edges=Edge.construct_edges(overlap)
+            new_edges=Edge.construct_edges(overlap,self.anchors.keys())
             if new_edges[0].node_from not in self.edges['to_right']:
                 self.edges['to_right'][new_edges[0].node_from ]=[]
             self.edges['to_right'][new_edges[0].node_from].append(new_edges[0])
@@ -142,7 +146,6 @@ class Graph():
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
                 all_length+=len(node_genome)
-                node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
 
                 if current_state.edge_from.overlap.relative_strand=='-':
                     switch_strand=not switch_strand

@@ -44,12 +44,17 @@ class CostSearch():
 
             current_state=open.pop(0)
 
-            #intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
-            #print('Number of found contigs:')
-            #print(len(intersecting_anchors))
+            intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
+            print('Number of found contigs:')
+            print(intersecting_anchors)
+            print(len(current_state.used_nodes))
             #print(current_state.anchors_found)
 
-
+            if len(current_state.used_nodes)>3000:
+                while current_state.previous_state.node.name not in anchor_names:
+                    current_state=current_state.previous_state
+                return current_state
+            '''
             if current_state.direction!=None:
                 path_length=len(self.graph.reconstruct_path(current_state))
                 intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
@@ -74,13 +79,28 @@ class CostSearch():
 
                     return current_state
                     #raise ValueError('Path is too long')
+            '''
 
 
             #if current_state in visited:
             #    continue
             #visited.add(current_state)
+            edges=sorted(self.graph.get_edges(current_state.node,current_state.direction),key=lambda edge: edge.overlap_score,reverse=True)
+            anchor_edges=[]
+            read_edges=[]
+            for edge in edges:
+                if edge.node_to.name in anchor_names:
+                    anchor_edges.append(edge)
+                else:
+                    read_edges.append(edge)
+            anchor_edges=sorted(anchor_edges,key=lambda edge: edge.overlap_score,reverse=True)
+            read_edges=sorted(read_edges,key=lambda edge: edge.overlap_score,reverse=True)
+            if current_state.node.name not in anchor_names and len(anchor_edges)>0:
+                store_edges=anchor_edges
+            else:
+                store_edges=read_edges
 
-            for edge in self.graph.get_edges(current_state.node,current_state.direction):
+            for edge in edges[:50]:
                 '''
                 get all edges from current_state in current_state's 'preferred' direction
                 '''
@@ -118,7 +138,111 @@ def state_key(state):
     #return state.anchors_found,state.score
     return state.score
 
+class DFSSearch():
+    def __init__(self,graph):
+        self.graph=graph
+
+    def get_maxes(open):
+        max_used_nodes=len(max(open,key=lambda state:len(state.used_nodes)).used_nodes)
+        max_score=max(open,key=lambda state:state.score).score
+
+        return max_used_nodes,max_score
+
+    def state_cmp(max_used_nodes,max_score):
+        def f(state):
+            return state.anchors_found,-1.*len(state.used_nodes)/max_used_nodes+1.2*state.score/max_score
+
+        return f
+
+    def search(self,start_node):
+        start_state=State(start_node,None,0,None,{start_node},None,1)
+        open=[start_state]
+        current_state=start_state
+
+        upper_length_threshold=0.25*sum([len(self.graph.anchors[anchor]) for anchor in self.graph.anchors])/len(self.graph.anchors)
+
+        anchor_names=set(self.graph.anchors.keys())
+        current_best_state=current_state
+        no_change=0
+        while len(anchor_names)-current_state.anchors_found!=0:
+
+            if len(open)==0:
+                raise ValueError('No path to end node')
+
+            current_state=open.pop(0)
+
+            if current_best_state.anchors_found>=current_state.anchors_found:
+                no_change+=1
+            else:
+                current_best_state=current_state
+                no_change=0
+
+            #if current_state.direction!=None:
+            #    if len(self.graph.get_extension_genome(current_state))>upper_length_threshold:
+            #        continue
+
+            if len(current_state.used_nodes)>1000:
+                continue
+
+            intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
+            print('Number of found contigs:')
+            print(intersecting_anchors)
+            print(len(current_state.used_nodes))
+            print(no_change)
+
+            edges=sorted(self.graph.get_edges(current_state.node,current_state.direction),key=lambda edge: edge.overlap_score,reverse=True)
+            anchor_edges=[]
+            read_edges=[]
+            for edge in edges:
+                if edge.node_to.name in anchor_names:
+                    anchor_edges.append(edge)
+                else:
+                    read_edges.append(edge)
+            anchor_edges=sorted(anchor_edges,key=lambda edge: edge.overlap_score,reverse=True)[:max(1,int(len(anchor_edges)*0.5))]
+            read_edges=sorted(read_edges,key=lambda edge: edge.overlap_score,reverse=True)[:max(1,int(len(read_edges)*0.5))]
+            if current_state.node.name not in anchor_names and len(anchor_edges)>0:
+                store_edges=anchor_edges
+            else:
+                store_edges=read_edges
+
+            index=0
+            #for edge in edges[:50]:
+            for edge in edges:
+                if edge.node_to not in current_state.used_nodes:
+                    new_used_nodes=set(current_state.used_nodes)
+                    new_used_nodes.add(edge.node_to)
+                    new_anchor_num=current_state.anchors_found
+                    if edge.node_to.name in anchor_names:
+                        new_anchor_num+=1
+                    new_state=State(edge.node_to,current_state,current_state.score+edge.overlap_score,edge.direction,new_used_nodes,edge,new_anchor_num)
+                    open.insert(index,new_state)
+                    index+=1
+
+            max_used_nodes,max_score=DFSSearch.get_maxes(open)
+            open=sorted(open,key=DFSSearch.state_cmp(max_used_nodes,max_score),reverse=True)[:5000]
+            if no_change>500:
+                return open[0]
+
+        return current_state
+
+
 if __name__=='__main__':
+    '''
+    ZA ECOLI RADI ZA 500 NO_CHANGE
+    1 ZA LEN
+    1.2 ZA SCORE
+    5000 cutoff open liste
+    ubacivalo se samo 50 nodeova iz edges (radi i za sve)
+    '''
+
+    '''
+    ZA CJEJUNI OKI RADI ZA 1000 NO_CHANGE ili 2000
+    -2 ZA LEN
+    0. ZA SCORE ili 0.5
+    100 cutoff open liste
+    ubacivali su se svi nodeovi iz edges
+    '''
+
     print('Creating the overlap graph...')
     '''
     needs contig.fasta reads.fasta overlaps_contig_reads and overlaps_reads_reads files
@@ -127,24 +251,35 @@ if __name__=='__main__':
     overlap_graph=Graph('./data/ecoli/contigs.fasta','./data/ecoli/reads.fasta','./data/ecoli/contig_read.paf','./data/ecoli/read_read.paf')
     print('Overlap graph done.')
     print('Starting the search...')
-    search=CostSearch(overlap_graph)
+    search=DFSSearch(overlap_graph)
 
     '''
     searchu se predaje Node koji je onda zapravo starting_node, u ovoj for petlji
     je kako se to radi iterativno za svaki contig, onda samo umjesto 'ctg3' stavite
     name kako bi se krenulo od tog Nodea.
     '''
-    current_best_state=None
+    best_states=[]
     for name in overlap_graph.anchors:
-        #try:
-        state=search.search(Node(name))
-        current_best_state=state.compare(current_best_state)
-        #except:
-        #    print('Nije %s'%(name))
+        try:
+            state=search.search(Node(name))
+            best_states.append(state)
+            genome=overlap_graph.reconstruct_path(state)
+            #current_best_state=state.compare(current_best_state)
+            FASTAReader.save('kita',genome,name+'ecoli.fasta')
+            print('Got one')
+        except:
+            print('Nije %s'%(name))
+
+    print("Duljine nadenih puteva:")
+    for state in best_states:
+        print(state.anchors_found)
+
+    max_used_nodes,max_score=DFSSearch.get_maxes(best_states)
+    best_state=sorted(best_states,key=DFSSearch.state_cmp(max_used_nodes,max_score),reverse=True)[0]
 
     print('Search done.')
     print('Reconstructing the genome...')
-    genome=overlap_graph.reconstruct_path(current_best_state)
+    genome=overlap_graph.reconstruct_path(best_state)
     print('Reconstruction done.')
     print('Saving genome...')
 
