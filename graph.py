@@ -147,25 +147,22 @@ class Graph():
                 if current_state.edge_from.overlap.relative_strand=='-':
                     switch_strand=not switch_strand
                 if switch_strand:
-                    genome=Utils.reverse_complement(node_genome)+genome
-                    #genome=node_genome+genome
-                else:
-                    genome=node_genome+genome
+                    node_genome=Utils.reverse_complement(node_genome)
+                node_genome=node_genome[current_state.previous_state.edge_from.overlap.target_end:current_state.edge_from.overlap.query_end]
+                genome=node_genome+genome
 
                 current_state=current_state.previous_state
                 count+=1
                 length+=len(node_genome)
             node_genome=self.get_genome(current_state.previous_state.node)
             all_length+=len(node_genome)
-            node_genome=node_genome[:current_state.edge_from.overlap.query_start]
 
             if current_state.edge_from.overlap.relative_strand=='-':
                 switch_strand=not switch_strand
             if switch_strand:
-                genome=Utils.reverse_complement(node_genome)+genome
-                #genome=node_genome+genome
-            else:
-                genome=node_genome+genome
+                node_genome=Utils.reverse_complement(node_genome)
+            node_genome=node_genome[:current_state.edge_from.overlap.query_start]
+            genome=node_genome+genome
 
         else:
             #print('OBRATNO')
@@ -175,30 +172,28 @@ class Graph():
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
                 all_length+=len(node_genome)
-                node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
 
                 if current_state.edge_from.overlap.relative_strand=='-':
                     switch_strand=not switch_strand
                 if switch_strand:
-                    genome+=Utils.reverse_complement(node_genome)
-                    #genome+=node_genome
-                else:
-                    genome+=node_genome
+                    node_genome=Utils.reverse_complement(node_genome)
+
+                node_genome=node_genome[current_state.edge_from.overlap.target_start:current_state.previous_state.edge_from.overlap.query_start]
+
+                genome+=node_genome
 
                 current_state=current_state.previous_state
                 count+=1
                 length+=len(node_genome)
             node_genome=self.get_genome(current_state.previous_state.node)
             all_length+=len(node_genome)
-            node_genome=node_genome[current_state.edge_from.overlap.target_start:]
 
             if current_state.edge_from.overlap.relative_strand=='-':
                 switch_strand=not switch_strand
             if switch_strand:
-                genome+=Utils.reverse_complement(node_genome)
-                #genome+=node_genome
-            else:
-                genome+=node_genome
+                node_genome=Utils.reverse_complement(node_genome)
+            node_genome=node_genome[current_state.edge_from.overlap.target_start:]
+            genome+=node_genome
         '''
         print("broj nodeova")
         print(count)
