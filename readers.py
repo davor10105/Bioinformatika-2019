@@ -52,10 +52,11 @@ class FASTAReader():
                 read_name=lines[i*2][1:].split()[0].strip()
                 read=lines[i*2+1].strip()
                 self.reads[read_name]=read
-    def save(node_name,genome,filepath):
+    def save(node_names,genomes,filepath):
         with open(filepath,'w') as file:
-            file.write('>'+node_name+'\n')
-            file.write(genome)
+            for node_name,genome in zip(node_names,genomes):
+                file.write('>'+node_name+'\n')
+                file.write(genome+'\n')
 
 class FASTQReader():
     '''

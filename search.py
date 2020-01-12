@@ -1,6 +1,5 @@
 from graph import *
 from readers import *
-import argparse
 
 class CostSearch():
     '''
@@ -149,13 +148,21 @@ class DFSSearch():
 
         return max_used_nodes,max_score
 
-    def state_cmp(max_used_nodes,max_score):
+    def state_cmp(max_used_nodes,max_score,used_node_weight,score_weight):
         def f(state):
-            return state.anchors_found,-1.*len(state.used_nodes)/max_used_nodes+1.2*state.score/max_score
+            if max_used_nodes==0:
+                cur_used_score=0
+            else:
+                cur_used_score=len(state.used_nodes)/max_used_nodes
+            if max_score==0:
+                cur_score_score=0
+            else:
+                cur_score_score=state.score/max_score
+            return state.anchors_found,-used_node_weight*cur_used_score+score_weight*cur_score_score
 
         return f
 
-    def search(self,start_node):
+    def search(self,start_node,found_anchors,max_node_length=1000,max_open_len=200,max_no_change=1000,used_node_weight=1.,score_weight=1.2):
         start_state=State(start_node,None,0,None,{start_node},None,1)
         open=[start_state]
         current_state=start_state
@@ -182,7 +189,7 @@ class DFSSearch():
             #    if len(self.graph.get_extension_genome(current_state))>upper_length_threshold:
             #        continue
 
-            if len(current_state.used_nodes)>1000:
+            if len(current_state.used_nodes)>max_node_length:
                 continue
 
             intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
@@ -209,7 +216,7 @@ class DFSSearch():
             index=0
             #for edge in edges[:50]:
             for edge in edges:
-                if edge.node_to not in current_state.used_nodes:
+                if edge.node_to not in current_state.used_nodes and edge.node_to.name not in found_anchors:
                     new_used_nodes=set(current_state.used_nodes)
                     new_used_nodes.add(edge.node_to)
                     new_anchor_num=current_state.anchors_found
@@ -220,43 +227,58 @@ class DFSSearch():
                     index+=1
 
             max_used_nodes,max_score=DFSSearch.get_maxes(open)
-            open=sorted(open,key=DFSSearch.state_cmp(max_used_nodes,max_score),reverse=True)[:5000]
-            if no_change>500:
-                return open[0]
+            open=sorted(open,key=DFSSearch.state_cmp(max_used_nodes,max_score,used_node_weight,score_weight),reverse=True)[:max_open_len]
+            if no_change>max_no_change:
+                best_state=open[0]
+                while best_state.node.name not in anchor_names:
+                    best_state=best_state.previous_state
+                return best_state
 
         return current_state
 
-'''
-Dodano za kasnije
-    potencijalno premjestiti negdje
-    ili staviti u main
-'''
-def parse_arguments():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('contig_path',type=str,help="Contig file path")
-    parser.add_argument('read_path',type=str,help="Read file path")
-    parser.add_argument('contig_read_overlap_path',type=str,help="Contig read overlap file path")
-    parser.add_argument('read_read_overlap_path',type=str,help="Contig read overlap file path")
-    args=parser.parse_args()
-    #print(args.contig_path)
-    #print(args.read_path)
-    return args
 
 if __name__=='__main__':
+    MAX_NODE_LENGTH=1000
+    MAX_OPEN_LEN=1000
+    MAX_NO_CHANGE=500
+    USED_NODE_WEIGHT=1
+    SCORE_WEIGHT=1.2
+
+    ORGANISM_NAME='cjejuni'
     '''
-    ZA ECOLI RADI ZA 500 NO_CHANGE
-    1 ZA LEN
-    1.2 ZA SCORE
-    5000 cutoff open liste
-    ubacivalo se samo 50 nodeova iz edges (radi i za sve)
+    ecoli
+
+    MAX_NODE_LENGTH=1000
+    MAX_OPEN_LEN=1000
+    MAX_NO_CHANGE=500
+    USED_NODE_WEIGHT=1
+    SCORE_WEIGHT=1.2
+
+    0.25 cutoff
+    svi edgeovi
     '''
 
     '''
-    ZA CJEJUNI OKI RADI ZA 1000 NO_CHANGE ili 2000
-    -2 ZA LEN
-    0. ZA SCORE ili 0.5
-    100 cutoff open liste
-    ubacivali su se svi nodeovi iz edges
+    cjejuni
+
+    MAX_NODE_LENGTH=1000
+    MAX_OPEN_LEN=1000
+    MAX_NO_CHANGE=500
+    USED_NODE_WEIGHT=1
+    SCORE_WEIGHT=1.2
+
+    0.25 cutoff
+    svi edgeovi
+    '''
+
+    '''
+    za bgram
+
+    MAX_NODE_LENGTH=1000
+    MAX_OPEN_LEN=200
+    MAX_NO_CHANGE=1000
+    USED_NODE_WEIGHT=2.
+    SCORE_WEIGHT=0.5
     '''
 
     print('Creating the overlap graph...')
@@ -264,45 +286,52 @@ if __name__=='__main__':
     needs contig.fasta reads.fasta overlaps_contig_reads and overlaps_reads_reads files
     to construct the overlap graph
     '''
-    #args=parse_arguments()
-    #overlap_graph=Graph(args.contig_path,args.read_path,args.contig_read_overlap_path,args.read_read_overlap_path)
-    overlap_graph=Graph('./data/ecoli/contigs.fasta','./data/ecoli/reads.fasta','./data/ecoli/contig_read.paf','./data/ecoli/read_read.paf')
+    overlap_graph=Graph('./data/cjejuni/contigs.fasta','./data/cjejuni/reads.fastq','./data/cjejuni/contig_read.paf','./data/cjejuni/read_read.paf')
     print('Overlap graph done.')
     print('Starting the search...')
     search=DFSSearch(overlap_graph)
 
     '''
-    searchu se predaje Node koji je onda zapravo starting_node, u ovoj for petlji
-    je kako se to radi iterativno za svaki contig, onda samo umjesto 'ctg3' stavite
-    name kako bi se krenulo od tog Nodea.
+    If not all contigs were found.
     '''
-    best_states=[]
-    for name in overlap_graph.anchors:
-        try:
-            state=search.search(Node(name))
-            best_states.append(state)
-            genome=overlap_graph.reconstruct_path(state)
-            #current_best_state=state.compare(current_best_state)
-            FASTAReader.save('kita',genome,name+'ecoli.fasta')
-            print('Got one')
-        except:
-            print('Nije %s'%(name))
+    all_anchors=set(overlap_graph.anchors.keys())
+    found_anchors=set()
+    whole_path=[]
+    while len(overlap_graph.anchors)-len(found_anchors)>0:
+        best_states=[]
+        for name in set(overlap_graph.anchors.keys()).difference(found_anchors):
+            try:
+                state=search.search(Node(name),found_anchors=found_anchors,max_node_length=MAX_NODE_LENGTH,max_open_len=MAX_OPEN_LEN,max_no_change=MAX_NO_CHANGE,used_node_weight=USED_NODE_WEIGHT,score_weight=SCORE_WEIGHT)
+                best_states.append(state)
+                genome=overlap_graph.reconstruct_path(state)
+                #current_best_state=state.compare(current_best_state)
+                FASTAReader.save('kita',genome,name+ORGANISM_NAME+'.fasta')
+                print('Got one')
+            except:
+                print('Nije %s'%(name))
+        max_used_nodes,max_score=DFSSearch.get_maxes(best_states)
+        best_state=sorted(best_states,key=DFSSearch.state_cmp(max_used_nodes,max_score,USED_NODE_WEIGHT,SCORE_WEIGHT),reverse=True)[0]
+        new_found_anchors=all_anchors.intersection(set([node.name for node in best_state.used_nodes]))
+        found_anchors=found_anchors.union(new_found_anchors)
 
-    print("Duljine nadenih puteva:")
-    for state in best_states:
-        print(state.anchors_found)
+        whole_path.append(best_state)
 
-    max_used_nodes,max_score=DFSSearch.get_maxes(best_states)
-    best_state=sorted(best_states,key=DFSSearch.state_cmp(max_used_nodes,max_score),reverse=True)[0]
+    for path in whole_path:
+        print(all_anchors.intersection(set([node.name for node in path.used_nodes])))
+
 
     print('Search done.')
     print('Reconstructing the genome...')
-    genome=overlap_graph.reconstruct_path(best_state)
+    genomes=[]
+    starting_switch_strand=False
+    for path in whole_path:
+        genome,starting_switch_strand=overlap_graph.reconstruct_path(path,starting_switch_strand=starting_switch_strand,return_strand=True)
+        genomes.append(genome)
     print('Reconstruction done.')
     print('Saving genome...')
 
     '''
     saves the found genome in file kita2.fasta and names the genome 'kita'
     '''
-    FASTAReader.save('kita',genome,'ecoli.fasta')
+    FASTAReader.save(['ctg'+str(i) for i in range(len(genomes))],genomes,ORGANISM_NAME+'.fasta')
     print('Save done.')

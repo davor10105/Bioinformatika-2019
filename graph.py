@@ -127,7 +127,7 @@ class Graph():
 
             return to_right_edges+to_left_edges
 
-    def reconstruct_path(self,end_state):
+    def reconstruct_path(self,end_state,starting_switch_strand=False,return_strand=False):
         '''
         From a given search State, returns the full reconstructed genome using backtracking.
         '''
@@ -138,11 +138,22 @@ class Graph():
         all_length=0
         #print(current_state.node.name)
         #print(current_state.edge_from.overlap)
+
+        if current_state.edge_from==None:
+            node_genome=self.get_genome(current_state.node)
+            if starting_switch_strand:
+                node_genome=Utils.reverse_complement(node_genome)
+            if return_strand:
+                return node_genome,starting_switch_strand
+            return node_genome
+
         if current_state.direction=='to_right':
             #print('PRAVA STRANA')
             node_genome=self.get_genome(current_state.node)
-            genome=node_genome[current_state.edge_from.overlap.target_end:] 
-            switch_strand=False
+            if starting_switch_strand:
+                node_genome=Utils.reverse_complement(node_genome)
+            genome=node_genome[current_state.edge_from.overlap.target_end:] #last node is from overlap start to the end of its get_genome
+            switch_strand=starting_switch_strand
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
                 all_length+=len(node_genome)
@@ -164,14 +175,16 @@ class Graph():
                 switch_strand=not switch_strand
             if switch_strand:
                 node_genome=Utils.reverse_complement(node_genome)
-            node_genome=node_genome[:current_state.edge_from.overlap.query_start]
+            node_genome=node_genome[:current_state.edge_from.overlap.query_end]
             genome=node_genome+genome
 
         else:
             #print('OBRATNO')
             node_genome=self.get_genome(current_state.node)
+            if starting_switch_strand:
+                node_genome=Utils.reverse_complement(node_genome)
             genome=node_genome[:current_state.edge_from.overlap.query_start] #last node is from overlap start to the end of its get_genome
-            switch_strand=False
+            switch_strand=starting_switch_strand
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
                 all_length+=len(node_genome)
@@ -197,6 +210,8 @@ class Graph():
                 node_genome=Utils.reverse_complement(node_genome)
             node_genome=node_genome[current_state.edge_from.overlap.target_start:]
             genome+=node_genome
+
+        print(switch_strand)
         '''
         print("broj nodeova")
         print(count)
@@ -207,6 +222,8 @@ class Graph():
         print('genome length')
         print(len(genome))
         '''
+        if return_strand:
+            return genome,switch_strand
         return genome
 
     def get_extension_genome(self,end_state):

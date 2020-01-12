@@ -69,7 +69,7 @@ class Utils():
             return overlap
         return None
 
-    def check_confidence(overlap,cutoff=0.4):
+    def check_confidence(overlap,cutoff=0.25):
         '''
         Checks if the overlap is within a certain threshold.
         '''
