@@ -23,7 +23,7 @@ class PAFReader():
     '''
     Reads PAF formatted file.
     '''
-    def __init__(self,filepath):
+    def __init__(self,filepath,overlap_confidence):
         self.overlaps=[]
         with open(filepath,'r') as file:
             count=0
@@ -32,7 +32,7 @@ class PAFReader():
                 args=[arg.strip() for arg in line.split('\t')]
                 new_overlap=Utils.check_if_contained(Overlap(args))
                 if new_overlap!=None:
-                    if Utils.check_confidence(new_overlap):
+                    if Utils.check_confidence(new_overlap,overlap_confidence):
                         self.overlaps.append(new_overlap)
 
                 if count%10000==0:

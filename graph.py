@@ -58,7 +58,7 @@ class Graph():
 
     Contains the full str partial genomes of contigs in self.anchors and reads in self.extensions.
     '''
-    def __init__(self,contig_path,read_path,contig_read_overlap_path,read_read_overlap_path):
+    def __init__(self,contig_path,read_path,contig_read_overlap_path,read_read_overlap_path,overlap_confidence=0.25):
         self.edges={'to_right':{},'to_left':{}}
 
         print('Loading data...')
@@ -72,11 +72,11 @@ class Graph():
         else:
             self.extensions=FASTQReader(read_path).reads
 
-        cr_paf=PAFReader(contig_read_overlap_path)
+        cr_paf=PAFReader(contig_read_overlap_path,overlap_confidence)
         #cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
         cr_cleaned_overlaps=cr_paf.overlaps
 
-        rr_paf=PAFReader(read_read_overlap_path)
+        rr_paf=PAFReader(read_read_overlap_path,overlap_confidence)
         #rr_cleaned_overlaps=Utils.get_extension_overlaps(rr_paf.overlaps)
         rr_cleaned_overlaps=rr_paf.overlaps
 

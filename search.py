@@ -286,7 +286,7 @@ if __name__=='__main__':
     needs contig.fasta reads.fasta overlaps_contig_reads and overlaps_reads_reads files
     to construct the overlap graph
     '''
-    overlap_graph=Graph('./data/cjejuni/contigs.fasta','./data/cjejuni/reads.fastq','./data/cjejuni/contig_read.paf','./data/cjejuni/read_read.paf')
+    overlap_graph=Graph('./data/cjejuni/contigs.fasta','./data/cjejuni/reads.fastq','./data/cjejuni/contig_read.paf','./data/cjejuni/read_read.paf',overlap_confidence=0.25)
     print('Overlap graph done.')
     print('Starting the search...')
     search=DFSSearch(overlap_graph)
