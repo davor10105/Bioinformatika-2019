@@ -1,5 +1,6 @@
 from graph import *
 from readers import *
+import argparse
 
 class CostSearch():
     '''
@@ -225,6 +226,21 @@ class DFSSearch():
 
         return current_state
 
+'''
+Dodano za kasnije
+    potencijalno premjestiti negdje
+    ili staviti u main
+'''
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('contig_path',type=str,help="Contig file path")
+    parser.add_argument('read_path',type=str,help="Read file path")
+    parser.add_argument('contig_read_overlap_path',type=str,help="Contig read overlap file path")
+    parser.add_argument('read_read_overlap_path',type=str,help="Contig read overlap file path")
+    args=parser.parse_args()
+    #print(args.contig_path)
+    #print(args.read_path)
+    return args
 
 if __name__=='__main__':
     '''
@@ -248,6 +264,8 @@ if __name__=='__main__':
     needs contig.fasta reads.fasta overlaps_contig_reads and overlaps_reads_reads files
     to construct the overlap graph
     '''
+    #args=parse_arguments()
+    #overlap_graph=Graph(args.contig_path,args.read_path,args.contig_read_overlap_path,args.read_read_overlap_path)
     overlap_graph=Graph('./data/ecoli/contigs.fasta','./data/ecoli/reads.fasta','./data/ecoli/contig_read.paf','./data/ecoli/read_read.paf')
     print('Overlap graph done.')
     print('Starting the search...')
