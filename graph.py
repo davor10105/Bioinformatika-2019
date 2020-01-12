@@ -141,7 +141,7 @@ class Graph():
         if current_state.direction=='to_right':
             #print('PRAVA STRANA')
             node_genome=self.get_genome(current_state.node)
-            genome=node_genome[current_state.edge_from.overlap.target_start:] #last node is from overlap start to the end of its get_genome
+            genome=node_genome[current_state.edge_from.overlap.target_end:] 
             switch_strand=False
             while current_state.previous_state.edge_from!=None:
                 node_genome=self.get_genome(current_state.previous_state.node)
