@@ -1,4 +1,5 @@
 from search import *
+import argparse
 
 class HERA():
     def run(contigs_path,reads_path,contig_read_overlap_path,read_read_overlap_path,
@@ -96,5 +97,32 @@ class HERA():
         FASTAReader.save(['ctg'+str(i) for i in range(len(genomes))],genomes,output_path)
         print('Save done.')
 
+def parse_arguments():
+    # def run(contigs_path,reads_path,contig_read_overlap_path,read_read_overlap_path,
+    #        output_path,OVERLAP_CONFIDENCE=0.25,MAX_NODE_LENGTH=1000,MAX_OPEN_LEN=1000,
+    #        MAX_NO_CHANGE=500,USED_NODE_WEIGHT=1,SCORE_WEIGHT=1.2):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('contigs_path',type=str,help="Contig file path")
+    parser.add_argument('reads_path',type=str,help="Read file path")
+    parser.add_argument('contig_read_overlap_path',type=str,help="Contig read overlap file path")
+    parser.add_argument('read_read_overlap_path',type=str,help="Contig read overlap file path")
+    parser.add_argument('output_path',type=str,help="Output file path")
+    parser.add_argument('--OVERLAP_CONFIDENCE',type=float,default=0.25,help="Specify overlape confidence")
+    parser.add_argument('--MAX_NODE_LENGTH',type=int,default=1000,help="Specify max node length")
+    parser.add_argument('--MAX_OPEN_LEN',type=int,default=1000,help="")
+    parser.add_argument('--MAX_NO_CHANGE',type=int,default=500,help="")
+    parser.add_argument('--USED_NODE_WEIGHT',type=float,default=1,help="")
+    parser.add_argument('--SCORE_WEIGHT',type=float,default=1.2,help="")
+    args=parser.parse_args()
+    return args
+
 if __name__=='__main__':
+    '''
+    args=parse_arguments()
+    HERA.run(args.contigs_path, args.reads_path, args.contig_read_overlap_path, args.read_read_overlap_path,
+            args.output_path, args.OVERLAP_CONFIDENCE, args.MAX_NODE_LENGTH,args. MAX_OPEN_LEN,
+            args.MAX_NO_CHANGE, args.USED_NODE_WEIGHT, args.SCORE_WEIGHT)
+    '''
     HERA.run('./data/cjejuni/contigs.fasta','./data/cjejuni/reads.fastq','./data/cjejuni/contig_read.paf','./data/cjejuni/read_read.paf','cjejuni.fasta')
+    #HERA.run('EC_contigs.fasta','EC_reads.fasta','EC_cr_overlaps.paf','EC_rr_overlaps.paf','ec_novo.fasta')
