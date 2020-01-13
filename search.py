@@ -3,10 +3,9 @@ from readers import *
 
 def state_key(state):
     return state.score,state.anchors_found
-    #return state.anchors_found,state.score
     return state.score
 
-class DFSSearch():
+class CostSearch():
     def __init__(self,graph):
         self.graph=graph
 
@@ -53,10 +52,6 @@ class DFSSearch():
                 current_best_state=current_state
                 no_change=0
 
-            #if current_state.direction!=None:
-            #    if len(self.graph.get_extension_genome(current_state))>upper_length_threshold:
-            #        continue
-
             if len(current_state.used_nodes)>max_node_length:
                 continue
 
@@ -82,7 +77,6 @@ class DFSSearch():
                 store_edges=read_edges
 
             index=0
-            #for edge in edges[:50]:
             for edge in edges:
                 if edge.node_to not in current_state.used_nodes and edge.node_to.name not in found_anchors:
                     new_used_nodes=set(current_state.used_nodes)
@@ -94,8 +88,8 @@ class DFSSearch():
                     open.insert(index,new_state)
                     index+=1
 
-            max_used_nodes,max_score=DFSSearch.get_maxes(open)
-            open=sorted(open,key=DFSSearch.state_cmp(max_used_nodes,max_score,used_node_weight,score_weight),reverse=True)[:max_open_len]
+            max_used_nodes,max_score=CostSearch.get_maxes(open)
+            open=sorted(open,key=CostSearch.state_cmp(max_used_nodes,max_score,used_node_weight,score_weight),reverse=True)[:max_open_len]
             if no_change>max_no_change:
                 best_state=open[0]
                 while best_state.node.name not in anchor_names:
