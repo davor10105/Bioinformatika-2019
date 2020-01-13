@@ -72,16 +72,11 @@ class Graph():
             self.extensions=FASTQReader(read_path).reads
 
         cr_paf=PAFReader(contig_read_overlap_path,overlap_confidence)
-        #cr_cleaned_overlaps=Utils.get_extension_overlaps(cr_paf.overlaps)
-        cr_cleaned_overlaps=cr_paf.overlaps
-
         rr_paf=PAFReader(read_read_overlap_path,overlap_confidence)
-        #rr_cleaned_overlaps=Utils.get_extension_overlaps(rr_paf.overlaps)
-        rr_cleaned_overlaps=rr_paf.overlaps
 
         print('Data loaded.')
 
-        all_overlaps=cr_cleaned_overlaps+rr_cleaned_overlaps
+        all_overlaps=cr_paf.overlaps+rr_paf.overlaps
         for overlap in all_overlaps:
             new_edges=Edge.construct_edges(overlap,self.anchors.keys())
             if new_edges[0].node_from not in self.edges['to_right']:
