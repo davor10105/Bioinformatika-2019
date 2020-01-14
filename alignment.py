@@ -61,7 +61,6 @@ class Utils():
         '''
         Calculates the extension score given overlap and overlap score.
         :param overlap_score:
-        :return:
         '''
         OH1=overlap.query_length-overlap.query_end
         OH2=overlap.target_start-0
@@ -83,7 +82,6 @@ class Utils():
     def complement(sequence):
         '''
         Returns a complement sequence for a given orginal sequence.
-        :return:
         '''
         complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
         bases = list(sequence)

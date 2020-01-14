@@ -1,9 +1,11 @@
 from graph import *
 from readers import *
 
+
 def state_key(state):
     return state.score,state.anchors_found
     return state.score
+
 
 class CostSearch():
     def __init__(self,graph):

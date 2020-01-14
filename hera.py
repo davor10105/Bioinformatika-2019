@@ -7,7 +7,7 @@ class HERA():
             output_path,OVERLAP_CONFIDENCE=0.25,MAX_NODE_LENGTH=1000,MAX_OPEN_LEN=1000,
             MAX_NO_CHANGE=500,USED_NODE_WEIGHT=1,SCORE_WEIGHT=1.2):
         """
-        Creates a graph and runs the search algorithm
+        Creates a graph and runs the search algorithm. Saves the result in a file.
         :param reads_path:
         :param contig_read_overlap_path:
         :param read_read_overlap_path:
@@ -18,7 +18,6 @@ class HERA():
         :param MAX_NO_CHANGE:
         :param USED_NODE_WEIGHT:
         :param SCORE_WEIGHT:
-        :return:
         """
 
         print('Creating the overlap graph...')
@@ -87,9 +86,6 @@ def parse_arguments():
     parser.add_argument('--MAX_NODE_LENGTH',type=int,default=1000,help="Number specifying max node length.")
     parser.add_argument('--MAX_OPEN_LEN',type=int,default=1000,help="Number specifying max number of considered sorted states.")
     parser.add_argument('--MAX_NO_CHANGE',type=int,default=500,help="Number specifying max number of search interations without finding state with more contigs.")
-    '''
-    TODO: Popravit help za zadnja dva
-    '''
     parser.add_argument('--USED_NODE_WEIGHT',type=float,default=1,help="Number specifying used node weight.")
     parser.add_argument('--SCORE_WEIGHT',type=float,default=1.2,help="Number specifying score weight.")
     args=parser.parse_args()
