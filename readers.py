@@ -80,6 +80,12 @@ class FASTAReader():
                 self.reads[read_name] = read
 
     def save(node_names, genomes, filepath):
+        """
+
+        :param genomes:
+        :param filepath:
+        :return:
+        """
         with open(filepath, 'w') as file:
             for node_name, genome in zip(node_names, genomes):
                 file.write('>' + node_name + '\n')

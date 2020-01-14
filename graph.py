@@ -1,6 +1,7 @@
 from readers import *
 from alignment import Utils
 
+
 class Edge():
     '''
     Defines an edge in an overlap graph, contains two Node objects, node_from,
@@ -44,10 +45,13 @@ class Node():
 
     def __str__(self):
         return "name: %s"%(self.name)
+
     def __hash__(self):
         return hash(self.name)
+
     def __eq__(self,other):
         return self.name==other.name
+
 
 class Graph():
     '''

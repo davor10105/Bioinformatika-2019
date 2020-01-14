@@ -1,4 +1,9 @@
+
 class Utils():
+    """
+    Contains methods for calculating various properties of sequences
+    and overlaps.
+    """
 
     def check_if_contained(overlap):
         '''
@@ -44,6 +49,7 @@ class Utils():
     def get_overlap_score(overlap):
         '''
         Calculates the overlap score.
+        :return: overlap score
         '''
         OL1=overlap.query_end-overlap.query_start
         OL2=overlap.target_end-overlap.target_start
@@ -53,7 +59,9 @@ class Utils():
 
     def get_extension_scores(overlap,overlap_score):
         '''
-        Calculates the extension score.
+        Calculates the extension score given overlap and overlap score.
+        :param overlap_score:
+        :return:
         '''
         OH1=overlap.query_length-overlap.query_end
         OH2=overlap.target_start-0
@@ -74,12 +82,14 @@ class Utils():
 
     def complement(sequence):
         '''
-        Returns a complement sequence
+        Returns a complement sequence for a given orginal sequence.
+        :return:
         '''
         complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
         bases = list(sequence)
         bases = [complement[base] for base in bases]
         return ''.join(bases)
+
 
 if __name__=='__main__':
     print(Utils.reverse_complement('AATTTGGCCCTT'))
