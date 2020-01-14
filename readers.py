@@ -5,7 +5,6 @@ class Overlap():
     '''
     Defines an overlap, basically PAF format overlap in a class.
     '''
-
     def __init__(self, args):
         self.args = args[:12]
         arg_names = [('query_name', str), ('query_length', int), ('query_start', int), ('query_end', int),
@@ -98,7 +97,6 @@ class FASTQReader():
     Reads a FASTAQ file and constructs a dictionary:
     {'node_name': NODE_GENOME (string)}
     '''
-
     def __init__(self, filepath):
         self.reads = {}
         with open(filepath, 'r') as file:

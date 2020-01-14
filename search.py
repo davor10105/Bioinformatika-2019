@@ -13,6 +13,8 @@ class CostSearch():
         '''
         Calculates number of used nodes of a state with largest number of used nodes
         and max score value for all states.
+        :param open list of states
+        :return maximum number of nodes in states in a list open and maximum overlap score in states in list open
         '''
         max_used_nodes=len(max(open,key=lambda state:len(state.used_nodes)).used_nodes)
         max_score=max(open,key=lambda state:state.score).score
@@ -20,11 +22,18 @@ class CostSearch():
         return max_used_nodes,max_score
 
     def state_cmp(max_used_nodes,max_score,used_node_weight,score_weight):
+        '''
+        :param max_used_nodes: maximum number of used nodes in all states in a given list
+        :param max_score: maximum overlap score in all states
+        :param used_node_weight: determines how much a number of used nodes will affect an overall score
+        :param score_weight: determines how much an overlap score will affect an overall score
+        :return: function to compare states for determining the best in cost search
+        '''
         def f(state):
             if max_used_nodes==0:
                 cur_used_score=0
             else:
-                cur_used_score=len(state.used_nodes)/max_used_nodes
+                cur_used_score=len(state.used_nodes) / max_used_nodes
             if max_score==0:
                 cur_score_score=0
             else:
@@ -34,6 +43,18 @@ class CostSearch():
         return f
 
     def search(self,start_node,found_anchors,max_node_length=1000,max_open_len=200,max_no_change=1000,used_node_weight=1.,score_weight=1.2):
+        '''
+
+        :param start_node: a node from which the search algorithm will start exploring the path
+        :param found_anchors: names of anchor nodes
+        :param max_node_length: maximum number of used nodes in a given state (algorithm ignores such states and continues)
+        :param max_open_len: maximum number of nodes stored in the list open
+        :param max_no_change: maximum number of iterations without progress in terms of finding new anchors
+        :param used_node_weight: determines how much a number of used nodes will affect an overall score
+        :param score_weight: determines how much an overlap score will affect an overall score
+        :return: a state with a maximum number of found anchor nodes if max_no_change was not reached, else
+                 the last state with anchor node from sorted list of states
+        '''
         start_state=State(start_node,None,0,None,{start_node},None,1)
         open=[start_state]
         current_state=start_state
@@ -62,10 +83,9 @@ class CostSearch():
                 continue
 
             intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
-            print('Number of found contigs:')
-            print(intersecting_anchors)
-            print(len(current_state.used_nodes))
-            print(no_change)
+            print('Number of found contigs:' + str(intersecting_anchors))
+            print('Number of used nodes in current state: ' + str(len(current_state.used_nodes)))
+            print('No change count: ' + str(no_change))
 
             '''
             Sort edges of a current node based on overlap score
