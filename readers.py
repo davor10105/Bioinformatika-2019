@@ -24,7 +24,6 @@ class PAFReader():
     '''
     Reads PAF formatted file.
     '''
-
     def __init__(self, filepath, overlap_confidence):
         self.overlaps = []
         with open(filepath, 'r') as file:
@@ -41,7 +40,6 @@ class PAFReader():
         :param lines: read lines
         :param index_from_inclusive:
         :param index_to_exclusive:
-        :return:
         '''
         for line in lines[index_from_inclusive:min(index_to_exclusive, len(lines))]:
             args = [arg.strip() for arg in line.split('\t')]
@@ -56,7 +54,6 @@ class PAFReader():
         Multithreaded version of loading overlaps into the list.
         :param n_threads:
         :param lines:
-        :return:
         '''
         import threading
         job_size = len(lines) // n_threads
@@ -84,7 +81,6 @@ class FASTAReader():
 
         :param genomes:
         :param filepath:
-        :return:
         """
         with open(filepath, 'w') as file:
             for node_name, genome in zip(node_names, genomes):

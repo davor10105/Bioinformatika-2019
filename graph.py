@@ -98,7 +98,7 @@ class Graph():
             return self.anchors[node.name]
         if node.name in self.extensions:
             return self.extensions[node.name]
-        print(node_name)
+        print(node.name)
         print(self.anchors.keys())
         raise ValueError('Could not find the node name')
 
