@@ -1,33 +1,4 @@
 class Utils():
-    def get_extension_overlaps(overlaps):
-        '''
-        Returns only the overlaps that aren't contained, for example:
-        this is OK:
-            node1:    AAATTT
-            node2:      ATTTAA
-        this is not OK:
-            node1:    AAATTT
-            node2:      ATT
-
-        Additionally, checks the confidence of the overlaps and returns only
-        those above the threshold. (OVO NISAM SIGURAN)
-        '''
-        extension_overlaps=[]
-        unconfident=0
-        for overlap in overlaps:
-            left_right_overlap=Utils.check_if_contained(overlap)
-            if left_right_overlap is not None:
-                if Utils.check_confidence(overlap):
-                    extension_overlaps.append(left_right_overlap)
-                else:
-                    unconfident+=1
-
-        print("Unconfident")
-        print(unconfident)
-        print("Confident")
-        print(len(overlaps)-unconfident)
-
-        return extension_overlaps
 
     def check_if_contained(overlap):
         '''
@@ -42,14 +13,7 @@ class Utils():
         will become:
         query:    read1:   AAAAAATTT
         target:    contig1:   AAATTTTTTTTTAA
-
-        Da malo bolje pojasnim, kada se u minimap ubace contig.fasta i reads.fasta,
-        on ce overlape uvijek dati u tom redoslijedu, znaci query ce uvijek biti node
-        iz contiga, a u targetu uvijek node iz reada. E sad, to bas nije prakticno
-        provjeravati unutar koda drugdje pa se ovdje kao query uvijek stavi lijeviji
-        node, a u target desniji node bez obzira je li contig ili read.
         '''
-        #TODO: MOZDA TREBA DRUGACIJE
         if overlap.query_length>overlap.target_length:
             longer_sequence=(overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name)
             shorter_sequence=(overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name)
@@ -73,9 +37,6 @@ class Utils():
         '''
         Checks if the overlap is within a certain threshold.
         '''
-        #TODO: NEMAM POJMA RACUNA LI SE TO OVAKO
-        #if overlap.block_length<40000:
-        #   return False
         if overlap.num_matches/overlap.block_length<cutoff:
             return False
         return True
@@ -117,8 +78,6 @@ class Utils():
         '''
         complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
         bases = list(sequence)
-        #for i in range(len(bases)):
-        #    bases[i] = complement[bases[i]]
         bases = [complement[base] for base in bases]
         return ''.join(bases)
 

@@ -10,6 +10,10 @@ class CostSearch():
         self.graph=graph
 
     def get_maxes(open):
+        '''
+        Calculates number of used nodes of a state with largest number of used nodes
+        and max score value for all states.
+        '''
         max_used_nodes=len(max(open,key=lambda state:len(state.used_nodes)).used_nodes)
         max_score=max(open,key=lambda state:state.score).score
 
@@ -34,11 +38,10 @@ class CostSearch():
         open=[start_state]
         current_state=start_state
 
-        upper_length_threshold=0.25*sum([len(self.graph.anchors[anchor]) for anchor in self.graph.anchors])/len(self.graph.anchors)
-
         anchor_names=set(self.graph.anchors.keys())
         current_best_state=current_state
         no_change=0
+
         while len(anchor_names)-current_state.anchors_found!=0:
 
             if len(open)==0:
@@ -46,6 +49,9 @@ class CostSearch():
 
             current_state=open.pop(0)
 
+            '''
+            Check number of current found anchors and set change
+            '''
             if current_best_state.anchors_found>=current_state.anchors_found:
                 no_change+=1
             else:
@@ -61,24 +67,17 @@ class CostSearch():
             print(len(current_state.used_nodes))
             print(no_change)
 
+            '''
+            Sort edges of a current node based on overlap score
+            '''
             edges=sorted(self.graph.get_edges(current_state.node,current_state.direction),key=lambda edge: edge.overlap_score,reverse=True)
-            anchor_edges=[]
-            read_edges=[]
-            for edge in edges:
-                if edge.node_to.name in anchor_names:
-                    anchor_edges.append(edge)
-                else:
-                    read_edges.append(edge)
-            anchor_edges=sorted(anchor_edges,key=lambda edge: edge.overlap_score,reverse=True)[:max(1,int(len(anchor_edges)*0.5))]
-            read_edges=sorted(read_edges,key=lambda edge: edge.overlap_score,reverse=True)[:max(1,int(len(read_edges)*0.5))]
-            if current_state.node.name not in anchor_names and len(anchor_edges)>0:
-                store_edges=anchor_edges
-            else:
-                store_edges=read_edges
 
             index=0
             for edge in edges:
                 if edge.node_to not in current_state.used_nodes and edge.node_to.name not in found_anchors:
+                    '''
+                    Create new state for each new node connected to node in current state
+                    '''
                     new_used_nodes=set(current_state.used_nodes)
                     new_used_nodes.add(edge.node_to)
                     new_anchor_num=current_state.anchors_found
@@ -89,8 +88,15 @@ class CostSearch():
                     index+=1
 
             max_used_nodes,max_score=CostSearch.get_maxes(open)
+            '''
+            Sort all states based on score and number of used nodes
+            '''
             open=sorted(open,key=CostSearch.state_cmp(max_used_nodes,max_score,used_node_weight,score_weight),reverse=True)[:max_open_len]
+
             if no_change>max_no_change:
+                '''
+                Return last state with anchor node from sorted list of states
+                '''
                 best_state=open[0]
                 while best_state.node.name not in anchor_names:
                     best_state=best_state.previous_state
