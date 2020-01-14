@@ -2,9 +2,24 @@ from search import *
 import argparse
 
 class HERA():
+
     def run(contigs_path,reads_path,contig_read_overlap_path,read_read_overlap_path,
             output_path,OVERLAP_CONFIDENCE=0.25,MAX_NODE_LENGTH=1000,MAX_OPEN_LEN=1000,
             MAX_NO_CHANGE=500,USED_NODE_WEIGHT=1,SCORE_WEIGHT=1.2):
+        """
+        Creates a graph and runs the search algorithm
+        :param reads_path:
+        :param contig_read_overlap_path:
+        :param read_read_overlap_path:
+        :param output_path:
+        :param OVERLAP_CONFIDENCE:
+        :param MAX_NODE_LENGTH:
+        :param MAX_OPEN_LEN:
+        :param MAX_NO_CHANGE:
+        :param USED_NODE_WEIGHT:
+        :param SCORE_WEIGHT:
+        :return:
+        """
 
         print('Creating the overlap graph...')
         '''
@@ -28,7 +43,7 @@ class HERA():
                 try:
                     state=search.search(Node(name),found_anchors=found_anchors,max_node_length=MAX_NODE_LENGTH,max_open_len=MAX_OPEN_LEN,max_no_change=MAX_NO_CHANGE,used_node_weight=USED_NODE_WEIGHT,score_weight=SCORE_WEIGHT)
                     best_states.append(state)
-                    #genome=overlap_graph.reconstruct_path(state)
+                    # genome=overlap_graph.reconstruct_path(state)
                 except:
                     print('Path from node %s not found'%(name))
             max_used_nodes,max_score=CostSearch.get_maxes(best_states)
