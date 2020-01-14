@@ -5,4 +5,8 @@ CJEJUNI:
 python3 hera.py ./data/cjejuni/contigs.fasta ./data/cjejuni/reads.fastq ./data/cjejuni/contig_read.paf ./data/cjejuni/read_read.paf cjejuni.fasta --OVERLAP_CONFIDENCE=0.4
 
 BGRAM:
-python3 hera.py ./data/bgram/contigs.fasta ./data/bgram/reads.fastq ./data/bgram/contig_read.paf ./data/bgram/read_read.paf bgram.fasta --OVERLAP_CONFIDENCE=0.6
+python3 hera.py ./data/bgram/contigs.fasta ./data/bgram/reads.fastq ./data/bgram/contig_read.paf ./data/bgram/read_read.paf bgram.fasta --OVERLAP_CONFIDENCE=0.6 --MAX_OPEN_LEN=200 --MAX_NO_CHANGE=1000 --USED_NODE_WEIGHT=2 --SCORE_WEIGHT=0.5
+
+
+
+
