@@ -28,9 +28,9 @@ class HERA():
                 try:
                     state=search.search(Node(name),found_anchors=found_anchors,max_node_length=MAX_NODE_LENGTH,max_open_len=MAX_OPEN_LEN,max_no_change=MAX_NO_CHANGE,used_node_weight=USED_NODE_WEIGHT,score_weight=SCORE_WEIGHT)
                     best_states.append(state)
-                    genome=overlap_graph.reconstruct_path(state)
+                    #genome=overlap_graph.reconstruct_path(state)
                 except:
-                    print('Nije %s'%(name))
+                    print('Path from node %s not found'%(name))
             max_used_nodes,max_score=CostSearch.get_maxes(best_states)
             best_state=sorted(best_states,key=CostSearch.state_cmp(max_used_nodes,max_score,USED_NODE_WEIGHT,SCORE_WEIGHT),reverse=True)[0]
             new_found_anchors=all_anchors.intersection(set([node.name for node in best_state.used_nodes]))
@@ -38,6 +38,7 @@ class HERA():
 
             whole_path.append(best_state)
 
+        print('Found contig connections:')
         for path in whole_path:
             print(all_anchors.intersection(set([node.name for node in path.used_nodes])))
 
@@ -46,7 +47,7 @@ class HERA():
         genomes=[]
         starting_switch_strand=False
         for path in whole_path:
-            genome,starting_switch_strand=overlap_graph.reconstruct_path(path,starting_switch_strand=starting_switch_strand,return_strand=True)
+            genome,starting_switch_strand=overlap_graph.reconstruct_path_forward(path,starting_switch_strand=starting_switch_strand,return_strand=True)
             genomes.append(genome)
         print('Reconstruction done.')
         print('Saving genome...')

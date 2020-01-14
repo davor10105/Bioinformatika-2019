@@ -82,11 +82,6 @@ class CostSearch():
             if len(current_state.used_nodes)>max_node_length:
                 continue
 
-            intersecting_anchors=anchor_names.intersection(set([node.name for node in current_state.used_nodes]))
-            print('Number of found contigs:' + str(intersecting_anchors))
-            print('Number of used nodes in current state: ' + str(len(current_state.used_nodes)))
-            print('No change count: ' + str(no_change))
-
             '''
             Sort edges of a current node based on overlap score
             '''

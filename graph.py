@@ -121,6 +121,71 @@ class Graph():
 
             return to_right_edges+to_left_edges
 
+    def reconstruct_path_forward(self,end_state,starting_switch_strand=False,return_strand=False):
+        '''
+        If there is only one node.
+        '''
+        genome=''
+        current_state=end_state
+        path=[]
+        switch_strand=False
+        while current_state.previous_state!=None:
+            path.append(current_state)
+            current_state=current_state.previous_state
+        path.append(current_state)
+        path.reverse()
+
+        if len(path)==1:
+            node_genome=self.get_genome(current_state.node)
+            if return_strand:
+                return node_genome,switch_strand
+            return node_genome
+
+        if path[1].direction=='to_right':
+            genome=self.get_genome(path[0].node)[:path[1].edge_from.overlap.query_end]
+        else:
+            genome=self.get_genome(path[0].node)[path[1].edge_from.overlap.target_start:]
+        counter=1
+        for path_node in path[1:-1]:
+            node_genome=self.get_genome(path_node.node)
+            strand=path_node.edge_from.overlap.relative_strand
+
+            if strand=='-':
+                switch_strand=not switch_strand
+            if switch_strand:
+                node_genome=Utils.reverse_complement(node_genome)
+
+            if path_node.direction=='to_right':
+                start=path_node.edge_from.overlap.target_end
+                end=path[counter+1].edge_from.overlap.query_end
+                genome+=node_genome[start:end]
+            else:
+                start=path[counter+1].edge_from.overlap.target_start
+                end=path_node.edge_from.overlap.query_start
+                genome=node_genome[start:end]+genome
+
+            counter+=1
+
+        path_node=path[-1]
+        node_genome=self.get_genome(path_node.node)
+        strand=path_node.edge_from.overlap.relative_strand
+
+        if strand=='-':
+            switch_strand=not switch_strand
+        if switch_strand:
+            node_genome=Utils.reverse_complement(node_genome)
+
+        if path_node.direction=='to_right':
+            start=path_node.edge_from.overlap.target_end
+            genome+=node_genome[start:]
+        else:
+            end=path_node.edge_from.overlap.query_start
+            genome=node_genome[:end]+genome
+
+        if return_strand:
+            return genome,switch_strand
+        return genome
+
     def reconstruct_path(self,end_state,starting_switch_strand=False,return_strand=False):
         '''
         From a given search State, returns the full reconstructed genome using backtracking.

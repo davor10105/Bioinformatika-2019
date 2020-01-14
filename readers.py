@@ -28,18 +28,12 @@ class PAFReader():
     def __init__(self, filepath, overlap_confidence):
         self.overlaps = []
         with open(filepath, 'r') as file:
-            count = 0
             for line in file.readlines():
-                count += 1
                 args = [arg.strip() for arg in line.split('\t')]
                 new_overlap = Utils.check_if_contained(Overlap(args))
                 if new_overlap != None:
                     if Utils.check_confidence(new_overlap, overlap_confidence):
                         self.overlaps.append(new_overlap)
-
-                if count % 10000 == 0:
-                    print("Broj obradenih overlapa:")
-                    print(count)
 
     def job(self, lines, index_from_inclusive, index_to_exclusive):
         '''
