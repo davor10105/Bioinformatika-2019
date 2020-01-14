@@ -1,0 +1,8 @@
+ECOLI:
+python3 hera.py ./data/ecoli/contigs.fasta ./data/ecoli/reads.fasta ./data/ecoli/contig_read.paf ./data/ecoli/read_read.paf ecoli.fasta --OVERLAP_CONFIDENCE=0.97
+
+CJEJUNI:
+python3 hera.py ./data/cjejuni/contigs.fasta ./data/cjejuni/reads.fastq ./data/cjejuni/contig_read.paf ./data/cjejuni/read_read.paf cjejuni.fasta --OVERLAP_CONFIDENCE=0.4
+
+BGRAM:
+python3 hera.py ./data/bgram/contigs.fasta ./data/bgram/reads.fastq ./data/bgram/contig_read.paf ./data/bgram/read_read.paf bgram.fasta --OVERLAP_CONFIDENCE=0.6
