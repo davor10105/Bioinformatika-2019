@@ -16,8 +16,8 @@ class Overlap():
             setattr(self, block[0], block[1](arg))
 
     def __str__(self):
-        return '(%s,%s,%s) (%s,%s,%s)' % (
-        self.query_length, self.query_start, self.query_end, self.target_length, self.target_start, self.target_end)
+        return '(%s,%s,%s,%s) (%s,%s,%s,%s) %s' % (
+        self.query_name,self.query_length, self.query_start, self.query_end, self.target_name,self.target_length, self.target_start, self.target_end, self.relative_strand)
 
 
 class PAFReader():

@@ -39,6 +39,7 @@ class HERA():
         while len(overlap_graph.anchors)-len(found_anchors)>0:
             best_states=[]
             for name in set(overlap_graph.anchors.keys()).difference(found_anchors):
+                print(name)
                 try:
                     state=search.search(Node(name),found_anchors=found_anchors,max_node_length=MAX_NODE_LENGTH,max_open_len=MAX_OPEN_LEN,max_no_change=MAX_NO_CHANGE,used_node_weight=USED_NODE_WEIGHT,score_weight=SCORE_WEIGHT)
                     best_states.append(state)

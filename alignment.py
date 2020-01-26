@@ -26,17 +26,35 @@ class Utils():
             shorter_sequence=(overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name)
             longer_sequence=(overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name)
 
-        if shorter_sequence[1]-0 > longer_sequence[1]-0:
-            #left overhang
-            overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
-            overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=longer_sequence[0],longer_sequence[1],longer_sequence[2],longer_sequence[3]
-            return overlap
-        elif shorter_sequence[0]-shorter_sequence[2] > longer_sequence[0]-longer_sequence[2]:
-            #right overhang
-            overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name=longer_sequence[0],longer_sequence[1],longer_sequence[2],longer_sequence[3]
-            overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
-            return overlap
-        return None
+        if overlap.relative_strand=='+':
+            if shorter_sequence[1]-0 > longer_sequence[1]-0:
+                #left overhang
+                overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
+                overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=longer_sequence[0],longer_sequence[1],longer_sequence[2],longer_sequence[3]
+
+                return overlap
+            elif shorter_sequence[0]-shorter_sequence[2] > longer_sequence[0]-longer_sequence[2]:
+                #right overhang
+                overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name=longer_sequence[0],longer_sequence[1],longer_sequence[2],longer_sequence[3]
+                overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
+
+                return overlap
+            return None
+        else:
+            #shorter_sequence=(shorter_sequence[0],shorter_sequence[0]-shorter_sequence[2],shorter_sequence[0]-shorter_sequence[1],shorter_sequence[3])
+            if shorter_sequence[0]-shorter_sequence[2]-0 > longer_sequence[1]-0:
+                #left overhang
+                overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name=longer_sequence[0],longer_sequence[1],longer_sequence[2],longer_sequence[3]
+                overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
+
+                return overlap
+            elif shorter_sequence[0]-(shorter_sequence[0]-shorter_sequence[1]) > longer_sequence[0]-longer_sequence[2]:
+                #right overhang
+                overlap.query_length,overlap.query_start,overlap.query_end,overlap.query_name=shorter_sequence[0],shorter_sequence[1],shorter_sequence[2],shorter_sequence[3]
+                overlap.target_length,overlap.target_start,overlap.target_end,overlap.target_name=longer_sequence[0],longer_sequence[1],longer_sequence[2],longer_sequence[3]
+
+                return overlap
+            return None
 
     def check_confidence(overlap,cutoff=0.25):
         '''

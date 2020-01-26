@@ -6,3 +6,6 @@ python3 hera.py ./data/cjejuni/contigs.fasta ./data/cjejuni/reads.fastq ./data/c
 
 BGRAM:
 python3 hera.py ./data/bgram/contigs.fasta ./data/bgram/reads.fastq ./data/bgram/contig_read.paf ./data/bgram/read_read.paf bgram.fasta --OVERLAP_CONFIDENCE=0.6 --MAX_OPEN_LEN=200 --MAX_NO_CHANGE=1000 --USED_NODE_WEIGHT=2 --SCORE_WEIGHT=0.5
+
+TEST:
+python3 hera.py ./data/test/testcontigs.fasta ./data/test/testreads.fasta ./data/test/test_C2R_ovl.paf ./data/test/test_R2R_ovl.paf test.fasta

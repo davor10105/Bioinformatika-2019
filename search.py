@@ -18,6 +18,7 @@ class CostSearch():
         :param open list of states
         :return maximum number of nodes in states in a list open and maximum overlap score in states in list open
         '''
+
         max_used_nodes=len(max(open,key=lambda state:len(state.used_nodes)).used_nodes)
         max_score=max(open,key=lambda state:state.score).score
 
@@ -109,7 +110,6 @@ class CostSearch():
             Sort all states based on score and number of used nodes
             '''
             open=sorted(open,key=CostSearch.state_cmp(max_used_nodes,max_score,used_node_weight,score_weight),reverse=True)[:max_open_len]
-
             if no_change>max_no_change:
                 '''
                 Return last state with anchor node from sorted list of states
